@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পেশাদার কুইজ অ্যাপ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #16a085; /* Dark Green */
+        }
+    </style>
+</head>
+<body class="bg-[#16a085] min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+
+    <div id="loading" class="absolute inset-0 bg-white/70 flex items-center justify-center z-50 hidden">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p class="text-gray-700 text-lg font-semibold">লোড হচ্ছে...</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
+            <p id="modal-message" class="text-gray-800 text-lg font-medium mb-4"></p>
+            <button id="modal-close-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full focus:outline-none focus:shadow-outline transition duration-300">ঠিক আছে</button>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
+        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-600 mb-6 animate-bounce text-center">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
+        <p class="text-gray-600 text-lg sm:text-xl mb-10 text-center">কুইজ শুরু করতে আপনার নাম লিখুন।</p>
+        <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+        <div class="flex flex-col sm:flex-row gap-6 justify-center">
+            <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
+            <button id="view-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
+        </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="hidden w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
+        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
+        </div>
+        <div class="flex justify-between items-center mb-8 text-gray-700 font-semibold text-lg sm:text-xl">
+            <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/১০</span>
+            <span id="score-display" class="text-lg sm:text-xl">স্কোর: ০</span>
+        </div>
+        <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-8"></h2>
+        <div id="options-container" class="space-y-4">
+            <!-- Options will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="hidden w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12 text-center">
+        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
+        </div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-6">অভিনন্দন!</h2>
+        <p id="final-score-text" class="text-xl sm:text-2xl text-gray-700 mb-4">আপনার স্কোর: ০/১০</p>
+        <p class="text-lg sm:text-xl text-gray-600 italic mb-8">ভালো লাগলে আমার আইডি ফলো করে রাখুন।</p>
+        <div class="flex flex-col sm:flex-row gap-6 justify-center">
+            <button id="restart-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">আবার খেলুন</button>
+            <button id="return-to-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
+        </div>
+    </div>
+
+    <!-- Merit List Page -->
+    <div id="merit-list-page" class="hidden w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
+        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
+        </div>
+        <h3 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-8 text-center">মেধা তালিকা</h3>
+        <ul id="merit-list" class="bg-gray-50 rounded-lg p-6 space-y-4 shadow-inner mb-8">
+            <!-- Merit list items will be dynamically inserted here -->
+        </ul>
+        <div class="flex flex-col sm:flex-row gap-6 justify-center">
+            <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">PDF ডাউনলোড করুন</button>
+            <button id="go-back-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">ফিরে যান</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Global variables for Firebase configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let userId = null;
+        let isAuthReady = false;
+
+        // UI elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const meritListPage = document.getElementById('merit-list-page');
+        const userNameInput = document.getElementById('user-name');
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const viewMeritListBtn = document.getElementById('view-merit-list-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score-display');
+        const finalScoreText = document.getElementById('final-score-text');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const returnToMeritListBtn = document.getElementById('return-to-merit-list-btn');
+        const meritList = document.getElementById('merit-list');
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
+        const goBackBtn = document.getElementById('go-back-btn');
+        const loadingScreen = document.getElementById('loading');
+        const modal = document.getElementById('modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let meritListData = [];
+        
+        // Quiz questions
+        const questions = [
+            {
+                question: "০১) 'শাশ্বত বঙ্গ' গ্রন্থটির রচয়িতা কে?",
+                options: ["কাজী মোতাহার হোসেন", "আবুল হুসেন", "কাজী আবদুল ওদুদ", "কাজী আনোয়ারুল কাদিও"],
+                answer: "কাজী আবদুল ওদুদ"
+            },
+            {
+                question: "০২) 'রেখাচিত্র' কার রচনা?",
+                options: ["গোলাম মোস্তাফা", "আবুল ফজল", "আবুল মনসুর আহমেদ", "বদরুদ্দীন ওমর"],
+                answer: "আবুল ফজল"
+            },
+            {
+                question: "০৩) 'রেখাচিত্র' কোন জাতীয় রচনা?",
+                options: ["জীবনী", "আত্মজীবনী", "রম্যরচনা", "ভ্রমণকাহিনী"],
+                answer: "আত্মজীবনী"
+            },
+            {
+                question: "০৪) বাংলা সাহিত্যের প্রথম সার্থক উপন্যাস কোনটি?",
+                options: ["দুর্গেশনন্দিনী", "বিষবৃক্ষ", "কপালকুণ্ডলা", "কৃষ্ণকান্তের উইল"],
+                answer: "দুর্গেশনন্দিনী"
+            },
+            {
+                question: "০৫) বাংলা সাহিত্যের প্রথম মুসলিম ঔপন্যাসিক কে?",
+                options: ["মীর মশাররফ হোসেন", "ইসমাইল হোসেন সিরাজী", "কাজী ইমদাদুল হক", "শরৎচন্দ্র চট্টোপাধ্যায়"],
+                answer: "মীর মশাররফ হোসেন"
+            },
+            {
+                question: "০৬) 'নিয়তির খেলা' প্রবন্ধটির রচয়িতা কে?",
+                options: ["মোতাহের হোসেন চৌধুরী", "কাজী আব্দুল ওদুদ", "কাজী নজরুল ইসলাম", "প্রমথ চৌধুরী"],
+                answer: "কাজী নজরুল ইসলাম"
+            },
+            {
+                question: "০৭) 'সবুজপত্র' পত্রিকাটি কত সালে প্রকাশিত হয়?",
+                options: ["১৯১৪", "১৯১৫", "১৯১৬", "১৯১৮"],
+                answer: "১৯১৪"
+            },
+            {
+                question: "০৮) 'প্রমথ চৌধুরীর ছদ্মনাম কি ছিল?",
+                options: ["বীরবল", "শৌনক", "রূপচাঁদ", "সত্যপীর"],
+                answer: "বীরবল"
+            },
+            {
+                question: "০৯) 'বিদ্রোহী' কবিতাটি কোন কাব্যগ্রন্থের অন্তর্ভুক্ত?",
+                options: ["অগ্নিবীণা", "বিষের বাঁশি", "সিন্ধু-হিন্দোল", "সর্বহারা"],
+                answer: "অগ্নিবীণা"
+            },
+            {
+                question: "১০) 'কবর' নাটকটি কে রচনা করেন?",
+                options: ["মুনীর চৌধুরী", "জসীমউদ্দীন", "শামসুর রাহমান", "সৈয়দ ওয়ালীউল্লাহ"],
+                answer: "মুনীর চৌধুরী"
+            }
+        ];
+
+        // --- Authentication ---
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                try {
+                    await (initialAuthToken ? signInWithCustomToken(auth, initialAuthToken) : signInAnonymously(auth));
+                } catch (error) {
+                    console.error("Firebase Auth Error:", error);
+                    showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+                }
+            } else {
+                userId = user.uid;
+                isAuthReady = true;
+                setupMeritListListener();
+            }
+        });
+
+        // --- Merit List ---
+        const setupMeritListListener = () => {
+            if (!isAuthReady) return;
+            const collectionPath = `artifacts/${appId}/public/data/quiz_results`;
+            const meritListRef = collection(db, collectionPath);
+            const q = query(meritListRef);
+
+            onSnapshot(q, (snapshot) => {
+                const results = [];
+                snapshot.forEach(doc => {
+                    results.push(doc.data());
+                });
+
+                results.sort((a, b) => b.score - a.score);
+                meritListData = results;
+                renderMeritList();
+            }, (error) => {
+                console.error("Merit list fetch error:", error);
+            });
+        };
+
+        const renderMeritList = () => {
+            meritList.innerHTML = '';
+            if (meritListData.length === 0) {
+                meritList.innerHTML = `<li class="text-center text-gray-500 italic">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
+                return;
+            }
+            meritListData.forEach((result, index) => {
+                const li = document.createElement('li');
+                li.className = `flex justify-between items-center p-4 rounded-lg text-lg ${index === 0 ? 'bg-yellow-200 font-bold' : 'bg-white'}`;
+                li.innerHTML = `
+                    <span class="flex-grow flex items-center min-w-0">
+                        <span class="w-8 text-center text-gray-600 mr-2 flex-shrink-0">${index + 1}.</span>
+                        <span class="truncate">${result.name}</span>
+                    </span>
+                    <span class="font-bold text-gray-800 ml-4">${result.score}/${questions.length}</span>
+                `;
+                meritList.appendChild(li);
+            });
+        };
+        
+        // --- Quiz Functions ---
+        const startQuiz = () => {
+            const userName = userNameInput.value.trim();
+            if (userName === '') {
+                showModal('কুইজ শুরু করার আগে আপনার নাম লিখুন।');
+                return;
+            }
+            showScreen('quiz');
+            currentQuestionIndex = 0;
+            score = 0;
+            renderQuestion();
+        };
+
+        const renderQuestion = () => {
+            if (currentQuestionIndex >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = currentQuestion.question;
+            questionCounter.textContent = `প্রশ্ন ${currentQuestionIndex + 1}/${questions.length}`;
+            scoreDisplay.textContent = `স্কোর: ${score}`;
+            optionsContainer.innerHTML = '';
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = "w-full p-5 rounded-lg text-left text-lg font-medium text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:scale-105 transform transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300";
+                button.addEventListener('click', () => handleAnswer(option));
+                optionsContainer.appendChild(button);
+            });
+        };
+
+        const handleAnswer = (selectedOption) => {
+            const currentQuestion = questions[currentQuestionIndex];
+            const optionButtons = optionsContainer.querySelectorAll('button');
+            
+            optionButtons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === currentQuestion.answer) {
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-500', 'hover:scale-105');
+                    btn.classList.add('bg-green-600');
+                } else if (btn.textContent === selectedOption) {
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-500', 'hover:scale-105');
+                    btn.classList.add('bg-red-600');
+                }
+            });
+
+            if (selectedOption === currentQuestion.answer) {
+                score++;
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                renderQuestion();
+            }, 1000);
+        };
+
+        const showResults = async () => {
+            showScreen('results');
+            finalScoreText.textContent = `আপনার স্কোর: ${score}/${questions.length}`;
+            
+            if (isAuthReady) {
+                loadingScreen.classList.remove('hidden');
+                const collectionPath = `artifacts/${appId}/public/data/quiz_results`;
+                try {
+                    await addDoc(collection(db, collectionPath), {
+                        name: userNameInput.value.trim(),
+                        score: score,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (e) {
+                    console.error("Error adding document: ", e);
+                    showModal("ফলাফল সংরক্ষণ করতে সমস্যা হয়েছে।");
+                } finally {
+                    loadingScreen.classList.add('hidden');
+                }
+            } else {
+                console.log("Not authenticated, skipping Firestore save.");
+            }
+        };
+
+        const restartQuiz = () => {
+            userNameInput.value = '';
+            showScreen('start');
+        };
+
+        const showScreen = (screenName) => {
+            startScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            meritListPage.classList.add('hidden');
+            
+            if (screenName === 'start') {
+                startScreen.classList.remove('hidden');
+            } else if (screenName === 'quiz') {
+                quizScreen.classList.remove('hidden');
+            } else if (screenName === 'results') {
+                resultsScreen.classList.remove('hidden');
+            } else if (screenName === 'merit-list') {
+                meritListPage.classList.remove('hidden');
+            }
+        };
+
+        // --- PDF Generation ---
+        const downloadPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // PDF-এর জন্য বাংলা ফন্ট যুক্ত করুন
+            // আপনার Base64-এনকোডেড ফন্ট ডেটা এখানে পেস্ট করুন।
+            // উদাহরণস্বরূপ, Noto Sans Bengali ফন্টের জন্য এইরকম ডেটা দরকার।
+            const bengaliFontBase64 = "<!-- এখানে Base64 ফন্ট ডেটা বসবে -->"; // উদাহরণ
+
+            doc.addFileToVFS('NotoSansBengali-Regular.ttf', bengaliFontBase64);
+            doc.addFont('NotoSansBengali-Regular.ttf', 'NotoSansBengali', 'normal');
+            doc.setFont('NotoSansBengali');
+
+            // টেবিলের হেডার ঠিক করা হয়েছে
+            const tableColumn = ["ক্রমিক নং", "নাম", "স্কোর"];
+            const tableRows = [];
+            
+            meritListData.forEach((item, index) => {
+                const row = [index + 1, item.name, `${item.score}/${questions.length}`];
+                tableRows.push(row);
+            });
+            
+            doc.text("কুইজের মেধা তালিকা", 14, 20);
+            
+            doc.autoTable({ 
+                head: [tableColumn], 
+                body: tableRows, 
+                startY: 25,
+                didDrawPage: function (data) {
+                    // This is to ensure the font is set on every page
+                    doc.setFont('NotoSansBengali');
+                }
+            });
+            doc.save('quiz_merit_list.pdf');
+        };
+
+        // --- Modal Functionality ---
+        const showModal = (message) => {
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+        };
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+        };
+
+        // --- Event Listeners ---
+        startQuizBtn.addEventListener('click', startQuiz);
+        viewMeritListBtn.addEventListener('click', () => showScreen('merit-list'));
+        restartQuizBtn.addEventListener('click', restartQuiz);
+        returnToMeritListBtn.addEventListener('click', () => showScreen('merit-list'));
+        downloadPdfBtn.addEventListener('click', downloadPDF);
+        goBackBtn.addEventListener('click', () => showScreen('start'));
+        modalCloseBtn.addEventListener('click', closeModal);
+
+    </script>
+</body>
+</html>
