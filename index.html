@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কুইজ অ্যাপ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Baloo Da 2', cursive;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Quiz Container -->
+    <div id="quiz-container" class="bg-gray-800 shadow-2xl rounded-2xl p-6 md:p-10 w-full max-w-lg transition-all duration-500 ease-in-out">
+        
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-400 mb-4">কুইজ অ্যাপ</h1>
+            <p class="text-lg text-gray-300 mb-8">জ্ঞান পরীক্ষা করার জন্য প্রস্তুত তো?</p>
+            <button id="start-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">শুরু করুন</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <h2 id="question-text" class="text-2xl font-semibold mb-6 text-center"></h2>
+            
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Option buttons will be injected here by JavaScript -->
+            </div>
+
+            <div id="result-message" class="text-center mt-6 text-xl font-bold"></div>
+            
+            <div class="mt-8 flex justify-between items-center">
+                <p id="score-text" class="text-xl font-semibold text-white">স্কোর: 0</p>
+                <button id="next-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 hidden">পরবর্তী</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-3xl font-extrabold text-blue-400 mb-4">কুইজ শেষ!</h2>
+            <p id="final-score-text" class="text-2xl font-bold mb-8"></p>
+            <button id="restart-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">আবার শুরু করুন</button>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextBtn = document.getElementById('next-btn');
+        const resultMessage = document.getElementById('result-message');
+        const scoreText = document.getElementById('score-text');
+        const finalScoreText = document.getElementById('final-score-text');
+        const restartBtn = document.getElementById('restart-btn');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // Quiz questions data in Bengali
+        const questions = [
+            {
+                question: "বাংলাদেশের রাজধানীর নাম কী?",
+                options: ["চট্টগ্রাম", "ঢাকা", "খুলনা", "সিলেট"],
+                answer: "ঢাকা"
+            },
+            {
+                question: "পৃথিবীর বৃহত্তম মহাদেশ কোনটি?",
+                options: ["ইউরোপ", "আফ্রিকা", "এশিয়া", "উত্তর আমেরিকা"],
+                answer: "এশিয়া"
+            },
+            {
+                question: "আইফেল টাওয়ার কোন শহরে অবস্থিত?",
+                options: ["লন্ডন", "রোম", "প্যারিস", "বার্লিন"],
+                answer: "প্যারিস"
+            },
+            {
+                question: "কম্পিউটারের জনক কে?",
+                options: ["বিল গেটস", "স্টিভ জবস", "চার্লস ব্যাবেজ", "মার্ক জুকারবার্গ"],
+                answer: "চার্লস ব্যাবেজ"
+            },
+            {
+                question: "বাংলাদেশের জাতীয় ফুল কোনটি?",
+                options: ["গোলাপ", "শাপলা", "জবা", "রজনীগন্ধা"],
+                answer: "শাপলা"
+            }
+        ];
+
+        // Function to start the quiz
+        function startQuiz() {
+            welcomeScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            updateScore();
+            showQuestion();
+        }
+
+        // Function to display a question and its options
+        function showQuestion() {
+            answered = false;
+            nextBtn.classList.add('hidden');
+            resultMessage.textContent = '';
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add(
+                    'bg-gray-700', 'hover:bg-gray-600', 'text-white', 'font-medium',
+                    'py-3', 'px-4', 'rounded-lg', 'shadow', 'text-sm', 'sm:text-base',
+                    'transition-all', 'duration-300', 'transform', 'hover:scale-105'
+                );
+                button.addEventListener('click', () => handleAnswer(option));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Function to handle user's answer
+        function handleAnswer(selectedOption) {
+            if (answered) return;
+            answered = true;
+
+            const currentQuestion = questions[currentQuestionIndex];
+            const allOptions = optionsContainer.querySelectorAll('button');
+
+            allOptions.forEach(button => {
+                const isCorrect = button.textContent === currentQuestion.answer;
+                
+                if (button.textContent === selectedOption) {
+                    if (isCorrect) {
+                        button.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+                        button.classList.add('bg-green-500');
+                        score++;
+                        resultMessage.textContent = 'সঠিক উত্তর!';
+                    } else {
+                        button.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+                        button.classList.add('bg-red-500');
+                        resultMessage.textContent = `ভুল উত্তর। সঠিক উত্তর: ${currentQuestion.answer}`;
+                    }
+                }
+                button.disabled = true; // Disable all buttons after one is clicked
+            });
+
+            updateScore();
+            nextBtn.classList.remove('hidden');
+        }
+
+        // Function to update the score display
+        function updateScore() {
+            scoreText.textContent = `স্কোর: ${score}`;
+        }
+
+        // Function to move to the next question or show results
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // Function to display final results
+        function showResult() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScoreText.textContent = `আপনি ${questions.length}টির মধ্যে ${score}টি সঠিক উত্তর দিয়েছেন!`;
+        }
+
+        // Function to restart the quiz
+        function restartQuiz() {
+            resultScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+    </script>
+
+</body>
+</html>
