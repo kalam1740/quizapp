@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Exam-15</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #16a085; /* Dark Green */
+            user-select: none; /* Text copying disabled */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        /* Disabling right-click and context menu on body */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Custom styles for responsive merit list columns */
+        .merit-list-header, .merit-list-item {
+            display: grid;
+            grid-template-columns: 0.1fr 1.5fr 0.5fr; /* Rank | Name | Score */
+            gap: 1rem;
+            align-items: center;
+        }
+        .merit-list-header {
+            font-weight: bold;
+        }
+        @media (max-width: 640px) {
+             .merit-list-header, .merit-list-item {
+                grid-template-columns: 0.2fr 1.2fr 0.6fr;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#16a085] min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+
+    <div id="loading" class="absolute inset-0 bg-white/70 flex items-center justify-center z-50 hidden">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p class="text-gray-700 text-lg font-semibold">লোড হচ্ছে...</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
+            <p id="modal-message" class="text-gray-800 text-lg font-medium mb-4"></p>
+            <button id="modal-close-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full focus:outline-none focus:shadow-outline transition duration-300">ঠিক আছে</button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
+        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-600 mb-6 animate-bounce text-center">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
+            <p class="text-gray-600 text-lg sm:text-xl mb-10 text-center">কুইজ শুরু করতে আপনার নাম লিখুন।</p>
+            <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
+                <button id="view-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+             <!-- TIMER COUNTDOWN IS NOW VISIBLE AND CENTERED -->
+            <div class="w-full flex justify-center mb-6">
+                <div class="w-20 h-10 flex items-center justify-center rounded-full bg-red-600 shadow-xl border-2 border-red-800 transition duration-500">
+                    <span id="timer-countdown" class="text-2xl font-extrabold text-white">10</span>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center mb-6 text-gray-700 font-semibold text-lg sm:text-xl">
+                <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/১০</span>
+                <span id="score-display" class="text-lg sm:text-xl">স্কোর: ০</span>
+            </div>
+           
+            <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-8"></h2>
+            <div id="options-container" class="space-y-4">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-4">অভিনন্দন!</h2>
+            <p id="final-score-text" class="text-xl sm:text-2xl text-gray-700 mb-6 font-bold"></p>
+            
+            <!-- Answer Review Section -->
+            <div class="text-left mb-8 bg-gray-100 p-4 rounded-lg shadow-inner max-h-96 overflow-y-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">উত্তর পর্যালোচনা</h3>
+                <div id="review-container" class="space-y-4">
+                    <!-- Review items will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <p class="text-lg sm:text-xl text-gray-600 italic mb-8">ভালো লাগলে আমার আইডি ফলো করে রাখুন।</p>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <button id="restart-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">আবার খেলুন</button>
+                <button id="return-to-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
+            </div>
+        </div>
+
+        <!-- Merit List Page -->
+        <div id="merit-list-page" class="hidden">
+            <h3 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-8 text-center">মেধা তালিকা</h3>
+            <div class="bg-gray-50 rounded-lg p-6 shadow-inner mb-8">
+                <!-- Merit List Header -->
+                <div class="merit-list-header p-3 bg-gray-300 rounded-t-lg text-gray-700 border-b border-gray-400">
+                    <span>Rank</span>
+                    <span>নাম</span>
+                    <span class="text-right">স্কোর</span>
+                </div>
+                <!-- Merit List Items -->
+                <ul id="merit-list" class="divide-y divide-gray-200">
+                    <!-- Merit list items will be dynamically inserted here -->
+                </ul>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">PDF ডাউনলোড করুন</button>
+                <button id="go-back-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">ফিরে যান</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Global listeners to prevent copying and right-click
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('copy', (e) => { e.preventDefault(); showModal('কুইজের প্রশ্ন কপি করা যাবে না।'); });
+        document.addEventListener('cut', (e) => { e.preventDefault(); showModal('কুইজের প্রশ্ন কপি করা যাবে না।'); });
+
+        // Firebase কনফিগারেশন। এটি আপনার প্রজেক্টের সাথে যুক্ত করার জন্য প্রয়োজন।
+        // Firebase কনসোল থেকে এই কোডটি কপি করে এখানে পেস্ট করুন।
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRndsLdL_AT0VxJctOfWOR64410ceH91Q",
+            authDomain: "apps-89bec.firebaseapp.com",
+            projectId: "apps-89bec",
+            storageBucket: "apps-89bec.firebasestorage.app",
+            messagingSenderId: "460356178253",
+            appId: "1:460356178253:web:1f88da365acb445dbda704",
+            measurementId: "G-2QGC51N1X7"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        let userId = null;
+        let isAuthReady = false;
+
+        // UI elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const meritListPage = document.getElementById('merit-list-page');
+        const userNameInput = document.getElementById('user-name');
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const viewMeritListBtn = document.getElementById('view-merit-list-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score-display');
+        const finalScoreText = document.getElementById('final-score-text');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const returnToMeritListBtn = document.getElementById('return-to-merit-list-btn');
+        const meritList = document.getElementById('merit-list');
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
+        const goBackBtn = document.getElementById('go-back-btn');
+        const loadingScreen = document.getElementById('loading');
+        const modal = document.getElementById('modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const reviewContainer = document.getElementById('review-container');
+        const timerCountdown = document.getElementById('timer-countdown'); // Re-added UI element
+
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let meritListData = [];
+        let userAnswers = []; // To store user selections for review
+        let quizTimer;
+        const TIME_LIMIT = 10; // Time limit in seconds (Updated to 10)
+        
+        // --- নতুন প্রশ্ন সেট হলে এটি পরিবর্তন করুন ---
+        const quizId = 'quiz-set-25'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
+        // --- ---
+
+        // Quiz questions
+        const questions = [
+            {
+                question: "১. বাংলাদেশে বর্তমানে কততম পঞ্চবার্ষিক পরিকল্পনা বাস্তবায়নাধীন?",
+                options: ["ক. ষষ্ঠ", "খ. সপ্তম", "গ. অষ্টম", "ঘ. নবম"],
+                answer: "গ. অষ্টম"
+            },
+            {
+                question: "২. ৭ম পঞ্চবার্ষিকী পরিকল্পনা মেয়াদে প্রতিবছর বাংলাদেশের গড় প্রকৃত জিডিপি প্রবৃদ্ধি অর্জনের লক্ষ্যমাত্রা-",
+                options: ["ক. ৭.০০%", "খ. ৭.৩০%", "গ. ৭.১২%", "ঘ. ৭.৪০%"],
+                answer: "ঘ. ৭.৪০%"
+            },
+            {
+                question: "৩. অষ্টম পঞ্চবার্ষিকী পরিকল্পনার মেয়াদকাল কোনটি?",
+                options: ["ক. জুলাই ২০২২-জুন ২০২৭", "খ. জুলাই ২০২০-জুন ২০২৫", "গ. জুলাই ২০১৭-জুন ২০২২", "ঘ. জুলাই ২০২১- জুন ২০২৬"],
+                answer: "খ. জুলাই ২০২০-জুন ২০২৫"
+            },
+            {
+                question: "৪. জাতীয় বাজেট ২০২৫-২৬ এর মোট বাজেট আকার কত?",
+                options: ["ক. ৬ লক্ষ ৯৭ হাজার কোটি টাকা", "খ. ৭ লক্ষ ৯০ হাজার কোটি টাকা", "গ. ৮ লক্ষ ৯০ হাজার কোটি টাকা", "ঘ. ৮ লক্ষ ৯৬ হাজার কোটি টাকা"],
+                answer: "খ. ৭ লক্ষ ৯০ হাজার কোটি টাকা"
+            },
+            {
+                question: "৫. বাজেট ২০২৫-২৬ অনুযায়ী GDP এর প্রবৃদ্ধির হারের লক্ষ্য মাত্রা কত?",
+                options: ["ক. ৫.৫৫ শতাংশ", "খ. ৫.৫ শতাংশ", "গ. ৬.৫৭ শতাংশ", "ঘ. ৭.৭৫ শতাংশ"],
+                answer: "খ. ৫.৫ শতাংশ"
+            },
+            {
+                question: "৬. বাজেট ২০২৫-২৬ অনুযায়ী মুদ্রাস্ফীতির হারের লক্ষ্যমাত্রা-",
+                options: ["ক. ৫.৬ শতাংশ", "খ. ৫.৭ শতাংশ", "গ. ৬.৫ শতাংশ", "ঘ. ৬.৭ শতাংশ"],
+                answer: "গ. ৬.৫ শতাংশ"
+            },
+            {
+                question: "৭. বাংলাদেশ সরকার সর্বোচ্চ আয় করে যে খাত থেকে-",
+                options: ["ক. মূল্য সংযোজন কর", "খ. প্রত্যক্ষ কর", "গ. আয় কর", "ঘ. ভূমি কর"],
+                answer: "ক. মূল্য সংযোজন কর"
+            },
+            {
+                question: "৮. বাংলাদেশ সরকারের ব্যয়ের প্রধান খাত কোনটি?",
+                options: ["ক. প্রতিরক্ষা", "খ. জন প্রশাসন", "গ. শিক্ষা ও প্রযুক্তি", "ঘ. সুদ পরিশোধ"],
+                answer: "ঘ. সুদ পরিশোধ"
+            },
+            {
+                question: "৯. বাংলাদেশের প্রথম EPZ কোনটি?",
+                options: ["ক. চট্টগ্রাম ইপিজেড", "খ. ঢাকা ইপিজেড", "গ. কুমিল্লা ইপিজেড", "ঘ. রংপুর ইপিজেড"],
+                answer: "ক. চট্টগ্রাম ইপিজেড"
+            },
+            {
+                question: "১০. বাংলাদেশের অষ্টম EPZ এর নাম কী?",
+                options: ["ক. কর্ণফুলী ইপিজেড", "খ. চট্টগ্রাম ইপিজেড", "গ. সীতাকুণ্ড ইপিজেড", "ঘ. কক্সবাজার ইপিজেড"],
+                answer: "ক. কর্ণফুলী ইপিজেড"
+            },
+            {
+                question: "১১. বাংলাদেশের সর্বশেষ EPZ কোথায় প্রতিষ্ঠিত হয়েছে?",
+                options: ["ক. আদমজীনগর", "খ. মানিকনগর", "গ. নবীনগর", "ঘ. চট্টগ্রাম"],
+                answer: "ঘ. চট্টগ্রাম"
+            },
+            {
+                question: "১২. 'সবার জন্য শিক্ষা' স্লোগানটি বাংলাদেশে প্রচলিত কোন মুদ্রায় রয়েছে?",
+                options: ["ক. ১ টাকা", "খ. ২ টাকা", "গ. ৫ টাকা", "ঘ. কোনোটিই নয়"],
+                answer: "খ. ২ টাকা"
+            },
+            {
+                question: "১৩. বাংলাদেশের ৫০০ টাকার নোট ছাপানো হয় কোথায় থেকে?",
+                options: ["ক. যুক্তরাষ্ট্র", "খ. ব্রিটেন", "গ. জাপান", "ঘ. জার্মানি"],
+                answer: "ঘ. জার্মানি"
+            },
+            {
+                question: "১৪. গণপরিষদ আদেশ জারি করা হয়-",
+                options: ["ক. ২৩ মার্চ, ১৯৭২", "খ. ১৩ এপ্রিল, ১৯৭২", "গ. ২৩ মে, ১৯৭২", "ঘ. ২৪ জুন, ১৯৭২"],
+                answer: "ক. ২৩ মার্চ, ১৯৭২"
+            },
+            {
+                question: "১৫. বাংলাদেশ গণপরিষদের প্রথম অধিবেশন কত তারিখে শুরু হয়?",
+                options: ["ক. ৭ এপ্রিল, ১৯৭২", "খ. ১০ এপ্রিল, ১৯৭২", "গ. ৭ এপ্রিল, ১৯৭৩", "ঘ. ১০ এপ্রিল, ১৯৭৩"],
+                answer: "খ. ১০ এপ্রিল, ১৯৭২"
+            },
+            {
+                question: "১৬. বাংলাদেশ গণপরিষদের প্রথম স্পীকার ছিলেন-",
+                options: ["ক. মোহাম্মদ উল্লাহ", "খ. শাহ আব্দুল হামিদ", "গ. ড. কামাল হোসেন", "ঘ. মওলানা আব্দুর রশিদ তর্কবাগিশ"],
+                answer: "খ. শাহ আব্দুল হামিদ"
+            },
+            {
+                question: "১৭. বাংলাদেশ সংবিধান রচনা কমিটির সদস্য ছিলেন কত জন?",
+                options: ["ক. ৩১", "খ. ৩২", "গ. ৩৪", "ঘ. ৩৩"],
+                answer: "গ. ৩৪"
+            },
+            {
+                question: "১৮. 'প্রজাতন্ত্রের রাষ্ট্রভাষা বাংলা' কথাটি সংবিধানের কোন অনুচ্ছেদে বলা হয়েছে?",
+                options: ["ক. অনুচ্ছেদ ২", "খ. অনুচ্ছেদ ৩", "গ. অনুচ্ছেদ ৫", "ঘ. অনুচ্ছেদ ৪"],
+                answer: "খ. অনুচ্ছেদ ৩"
+            },
+            {
+                question: "১৯. সংবিধানের কোন অনুচ্ছেদে 'চলাফেরার স্বাধীনতা' উল্লেখ রয়েছে?",
+                options: ["ক. ৩৬ নং অনুচ্ছেদ", "খ. ৩৭ নং অনুচ্ছেদ", "গ. ৩১ নং অনুচ্ছেদ", "ঘ. ৩৫ নং অনুচ্ছেদ"],
+                answer: "ক. ৩৬ নং অনুচ্ছেদ"
+            },
+            {
+                question: "২০. একজন সংসদ সদস্য স্পীকারের অনুমতি ছাড়া কত দিন সংসদের বাইরে থাকতে পারবে?",
+                options: ["ক. ৩০ দিন", "খ. ৬০ দিন", "গ. ৪৫ দিন", "ঘ. ৯০ দিন"],
+                answer: "খ. ৬০ দিন"
+            }
+        ];
+        
+        // --- Authentication ---
+        auth.signInAnonymously().then((userCredential) => {
+            userId = userCredential.user.uid;
+            isAuthReady = true;
+            // Auth সফল হলেই Merit List Listener সেট করা হবে (Workaround for Permission Error)
+            setupMeritListListener(); 
+        }).catch((error) => {
+            console.error("Firebase Auth Error:", error);
+            showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+        });
+
+        // --- Timer Functions ---
+        const startTimer = () => {
+            let timeLeft = TIME_LIMIT;
+            timerCountdown.textContent = timeLeft;
+            timerCountdown.parentNode.classList.remove('bg-yellow-600', 'bg-green-600');
+            timerCountdown.parentNode.classList.add('bg-red-600');
+            
+            if (quizTimer) clearInterval(quizTimer);
+
+            quizTimer = setInterval(() => {
+                timeLeft--;
+                timerCountdown.textContent = timeLeft;
+                
+                if (timeLeft <= 3 && timeLeft > 0) { // Changed threshold for yellow warning
+                     timerCountdown.parentNode.classList.remove('bg-red-600');
+                     timerCountdown.parentNode.classList.add('bg-yellow-600');
+                }
+                if (timeLeft === 0) {
+                     timerCountdown.parentNode.classList.remove('bg-yellow-600');
+                     timerCountdown.parentNode.classList.add('bg-green-600');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(quizTimer);
+                    handleAnswer(null); // Time's up
+                }
+            }, 1000);
+        };
+
+        const clearTimer = () => {
+            if (quizTimer) {
+                clearInterval(quizTimer);
+                quizTimer = null;
+            }
+        };
+
+        // --- Merit List ---
+        const setupMeritListListener = () => {
+            if (!isAuthReady) return;
+            // Collection path: quiz_results/{quizId}/scores
+            const meritListRef = db.collection('quiz_results').doc(quizId).collection('scores');
+            
+            meritListRef.orderBy('score', 'desc').onSnapshot(snapshot => {
+                const results = [];
+                snapshot.forEach(doc => {
+                    // Store the document ID with data for later deletion/update
+                    const data = doc.data();
+                    data.docId = doc.id; 
+                    results.push(data);
+                });
+                // Sort by score (descending) then by timestamp (ascending for tie-breaker)
+                results.sort((a, b) => {
+                    if (b.score !== a.score) {
+                        return b.score - a.score;
+                    }
+                    // Handle timestamp tie-breaker (earlier submission wins)
+                    if (a.timestamp && b.timestamp) {
+                        return a.timestamp.toDate() - b.timestamp.toDate();
+                    }
+                    return 0;
+                });
+
+                meritListData = results;
+                renderMeritList();
+            }, error => {
+                console.error("Merit list fetch error:", error);
+                // Security Rule-এর সমস্যার কারণে এই ত্রুটিটি আসতে পারে
+                showModal("মেধা তালিকা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে নিশ্চিত করুন যে Firebase Security Rules সঠিকভাবে সেট করা আছে।");
+            });
+        };
+
+        const getRankDesign = (index) => {
+            if (index === 0) return 'bg-yellow-400 text-yellow-900 border-yellow-500 font-extrabold shadow-lg';
+            if (index === 1) return 'bg-gray-400 text-gray-900 border-gray-500 font-bold shadow-md';
+            if (index === 2) return 'bg-orange-300 text-orange-900 border-orange-400 font-semibold shadow';
+            return 'bg-gray-100 text-gray-700 border-gray-300';
+        };
+
+        const renderMeritList = () => {
+            meritList.innerHTML = '';
+            if (meritListData.length === 0) {
+                meritList.innerHTML = `<li class="text-center text-gray-500 italic p-4">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
+                return;
+            }
+            
+            // --- Implement Rank Sharing Logic ---
+            let currentRank = 1;
+            let currentScore = -1;
+            
+            meritListData.forEach((result, index) => {
+                // Determine rank based on previous score
+                if (result.score < currentScore) {
+                    currentRank = index + 1; // Increment rank if score is lower than previous
+                }
+                currentScore = result.score; // Update current score
+
+                const rankText = currentRank === 1 ? '১ম' : 
+                                 currentRank === 2 ? '২য়' : 
+                                 currentRank === 3 ? '৩য়' : 
+                                 currentRank + '.'; // Using period for other ranks
+                                 
+                // Note: Rank class uses (currentRank - 1) to map 1st, 2nd, 3rd to indices 0, 1, 2
+                const rankClass = getRankDesign(currentRank - 1); 
+
+                const li = document.createElement('li');
+                li.className = `merit-list-item p-4 text-lg border-b ${rankClass} transition duration-150`;
+                
+                li.innerHTML = `
+                    <span class="text-center font-extrabold">${rankText}</span>
+                    <span class="truncate">${result.name}</span>
+                    <span class="font-bold text-right">${result.score}/${questions.length}</span>
+                `;
+                meritList.appendChild(li);
+            });
+        };
+        
+        // --- Quiz Functions ---
+        const startQuiz = () => {
+            const userName = userNameInput.value.trim();
+            if (userName === '') {
+                showModal('কুইজ শুরু করার আগে আপনার নাম লিখুন।');
+                return;
+            }
+            showScreen('quiz');
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = []; // Reset user answers
+            renderQuestion();
+        };
+
+        const renderQuestion = () => {
+            clearTimer();
+            if (currentQuestionIndex >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = currentQuestion.question;
+            questionCounter.textContent = `প্রশ্ন ${currentQuestionIndex + 1}/${questions.length}`;
+            scoreDisplay.textContent = `স্কোর: ${score}`;
+            optionsContainer.innerHTML = '';
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                // Updated Smart Button Design
+                button.className = "w-full p-5 rounded-xl text-left text-lg font-medium text-white bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 transform transition duration-200 hover:scale-[1.03] focus:outline-none shadow-lg hover:shadow-xl active:scale-[1.01]";
+                button.addEventListener('click', () => handleAnswer(option));
+                optionsContainer.appendChild(button);
+            });
+
+            startTimer();
+        };
+
+        const handleAnswer = (selectedOption) => {
+            clearTimer();
+            const currentQuestion = questions[currentQuestionIndex];
+            const optionButtons = optionsContainer.querySelectorAll('button');
+            const isCorrect = selectedOption === currentQuestion.answer;
+
+            // Store the result for review
+            userAnswers.push({
+                question: currentQuestion.question,
+                correctAnswer: currentQuestion.answer,
+                userSelected: selectedOption === null ? 'সময় শেষ' : selectedOption,
+                isCorrect: isCorrect
+            });
+
+            optionButtons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === currentQuestion.answer) {
+                    // Correct answer (Green)
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-700', 'to-indigo-700', 'hover:from-blue-600', 'hover:to-indigo-600', 'hover:scale-[1.03]');
+                    btn.classList.add('bg-green-600', 'shadow-lg');
+                } else if (btn.textContent === selectedOption) {
+                    // Wrong answer selected (Red)
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-700', 'to-indigo-700', 'hover:from-blue-600', 'hover:to-indigo-600', 'hover:scale-[1.03]');
+                    btn.classList.add('bg-red-600', 'shadow-lg');
+                } else {
+                     // Dim unselected wrong options
+                     btn.classList.add('opacity-50');
+                }
+            });
+            
+            // If time is up, show correct answer but don't count score
+            if (selectedOption !== null && isCorrect) {
+                score++;
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                renderQuestion();
+            }, 1500); // Wait a bit longer to see the result
+        };
+
+        const renderQuizReview = () => {
+            reviewContainer.innerHTML = '';
+            userAnswers.forEach((answer, index) => {
+                const reviewItem = document.createElement('div');
+                const isCorrect = answer.isCorrect;
+                const textColor = isCorrect ? 'text-green-700' : 'text-red-700';
+                const bgColor = isCorrect ? 'bg-green-50' : 'bg-red-50';
+                const icon = isCorrect ? '✅' : '❌';
+                const selectedText = answer.userSelected === null ? 'সময় শেষ, উত্তর দেননি।' : answer.userSelected;
+
+                reviewItem.className = `p-4 rounded-lg border ${bgColor}`;
+                reviewItem.innerHTML = `
+                    <p class="font-bold text-lg mb-2 ${textColor}">${index + 1}. ${answer.question} <span class="float-right">${icon}</span></p>
+                    <p class="text-sm">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
+                    <p class="text-sm">সঠিক উত্তর: <span class="text-green-600 font-semibold">${answer.correctAnswer}</span></p>
+                `;
+                reviewContainer.appendChild(reviewItem);
+            });
+        };
+
+
+        const showResults = async () => {
+            clearTimer(); // Just in case
+            showScreen('results');
+            finalScoreText.textContent = `আপনার স্কোর: ${score}/${questions.length}`;
+            renderQuizReview(); // Show the review section
+            
+            if (isAuthReady) {
+                loadingScreen.classList.remove('hidden');
+                try {
+                    const scoresRef = db.collection('quiz_results').doc(quizId).collection('scores');
+                    
+                    // 1. Check for existing score from this user
+                    const existingScoreQuery = await scoresRef.where('userId', '==', userId).get();
+                    
+                    if (!existingScoreQuery.empty) {
+                        // 2. If existing score found, delete it to ensure only one entry per user
+                        const docToDelete = existingScoreQuery.docs[0].id;
+                        await scoresRef.doc(docToDelete).delete();
+                    }
+
+                    // 3. Save the new score
+                    await scoresRef.add({
+                        userId: userId, // Add userId to track the user
+                        name: userNameInput.value.trim(),
+                        score: score,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                } catch (e) {
+                    console.error("Error adding document: ", e);
+                    showModal("ফলাফল সংরক্ষণ করতে সমস্যা হয়েছে। অনুগ্রহ করে Firebase Rules চেক করুন।");
+                } finally {
+                    loadingScreen.classList.add('hidden');
+                }
+            } else {
+                console.log("Not authenticated, skipping Firestore save.");
+            }
+        };
+
+        const restartQuiz = () => {
+            userNameInput.value = '';
+            showScreen('start');
+        };
+
+        const showScreen = (screenName) => {
+            startScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            meritListPage.classList.add('hidden');
+            
+            if (screenName === 'start') {
+                startScreen.classList.remove('hidden');
+            } else if (screenName === 'quiz') {
+                quizScreen.classList.remove('hidden');
+            } else if (screenName === 'results') {
+                resultsScreen.classList.remove('hidden');
+            } else if (screenName === 'merit-list') {
+                meritListPage.classList.remove('hidden');
+            }
+        };
+
+        // --- PDF Generation ---
+        const downloadPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // 1. Set Title Font Size larger
+            doc.setFontSize(16); 
+            
+            // Bangla font is completely removed from PDF logic to ensure clear English output
+            const tableColumn = ["Rank", "Name", "Score"];
+            const tableRows = [];
+            
+            let currentRank = 1;
+            let currentScore = -1;
+
+            meritListData.forEach((item, index) => {
+                if (item.score < currentScore) {
+                    currentRank = index + 1;
+                }
+                currentScore = item.score;
+                
+                const rankText = currentRank === 1 ? '1st' : 
+                                 currentRank === 2 ? '2nd' : 
+                                 currentRank === 3 ? '3rd' : 
+                                 currentRank + '.';
+
+                const row = [rankText, item.name, `${item.score}/${questions.length}`];
+                tableRows.push(row);
+            });
+            
+            doc.text("Quiz Merit List", 14, 20);
+            
+            doc.autoTable({ 
+                head: [tableColumn], 
+                body: tableRows, 
+                startY: 25,
+                // 2. Increase font size for body and header
+                styles: { 
+                    fontSize: 12, // Increased font size for body cells
+                    cellPadding: 3,
+                },
+                headStyles: {
+                    fontSize: 14, // Increased font size for header
+                    fillColor: [52, 73, 94] 
+                }
+            });
+            doc.save('quiz_merit_list.pdf');
+        };
+
+        // --- Modal Functionality ---
+        const showModal = (message) => {
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+        };
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+        };
+
+        // --- Event Listeners ---
+        startQuizBtn.addEventListener('click', startQuiz);
+        viewMeritListBtn.addEventListener('click', () => showScreen('merit-list'));
+        restartQuizBtn.addEventListener('click', restartQuiz);
+        returnToMeritListBtn.addEventListener('click', () => showScreen('merit-list'));
+        downloadPdfBtn.addEventListener('click', downloadPDF);
+        goBackBtn.addEventListener('click', () => showScreen('start'));
+        modalCloseBtn.addEventListener('click', closeModal);
+
+    </script>
+</body>
+</html>
