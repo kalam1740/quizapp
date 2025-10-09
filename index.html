@@ -5,15 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>পেশাদার কুইজ অ্যাপ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #16a085; /* Dark Green */
+            user-select: none; /* Text copying disabled */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        /* Disabling right-click and context menu on body */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Custom styles for responsive merit list columns */
+        .merit-list-header, .merit-list-item {
+            display: grid;
+            grid-template-columns: 0.1fr 1.5fr 0.5fr; /* Rank | Name | Score */
+            gap: 1rem;
+            align-items: center;
+        }
+        .merit-list-header {
+            font-weight: bold;
+        }
+        @media (max-width: 640px) {
+             .merit-list-header, .merit-list-item {
+                grid-template-columns: 0.2fr 1.2fr 0.6fr;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -34,78 +59,106 @@
         </div>
     </div>
 
-    <!-- Start Screen -->
-    <div id="start-screen" class="w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
+    <div class="w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
         <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
         </div>
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-600 mb-6 animate-bounce text-center">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
-        <p class="text-gray-600 text-lg sm:text-xl mb-10 text-center">কুইজ শুরু করতে আপনার নাম লিখুন।</p>
-        <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
-        <div class="flex flex-col sm:flex-row gap-6 justify-center">
-            <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
-            <button id="view-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
-        </div>
-    </div>
-
-    <!-- Quiz Screen -->
-    <div id="quiz-screen" class="hidden w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
-        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
-        </div>
-        <div class="flex justify-between items-center mb-8 text-gray-700 font-semibold text-lg sm:text-xl">
-            <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/১০</span>
-            <span id="score-display" class="text-lg sm:text-xl">স্কোর: ০</span>
-        </div>
-        <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-8"></h2>
-        <div id="options-container" class="space-y-4">
-            <!-- Options will be dynamically inserted here -->
-        </div>
-    </div>
-
-    <!-- Results Screen -->
-    <div id="results-screen" class="hidden w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12 text-center">
-        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
-        </div>
-        <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-6">অভিনন্দন!</h2>
-        <p id="final-score-text" class="text-xl sm:text-2xl text-gray-700 mb-4">আপনার স্কোর: ০/১০</p>
-        <p class="text-lg sm:text-xl text-gray-600 italic mb-8">ভালো লাগলে আমার আইডি ফলো করে রাখুন।</p>
-        <div class="flex flex-col sm:flex-row gap-6 justify-center">
-            <button id="restart-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">আবার খেলুন</button>
-            <button id="return-to-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
-        </div>
-    </div>
-
-    <!-- Merit List Page -->
-    <div id="merit-list-page" class="hidden w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
-        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
-        </div>
-        <h3 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-8 text-center">মেধা তালিকা</h3>
-        <ul id="merit-list" class="bg-gray-50 rounded-lg p-6 space-y-4 shadow-inner mb-8">
-            <!-- Merit list items will be dynamically inserted here -->
-        </ul>
-        <div class="flex flex-col sm:flex-row gap-6 justify-center">
-            <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">PDF ডাউনলোড করুন</button>
-            <button id="go-back-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">ফিরে যান</button>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // Global variables for Firebase configuration
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-600 mb-6 animate-bounce text-center">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
+            <p class="text-gray-600 text-lg sm:text-xl mb-10 text-center">কুইজ শুরু করতে আপনার নাম লিখুন।</p>
+            <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
+                <button id="view-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
+            </div>
+        </div>
 
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+             <!-- TIMER COUNTDOWN IS NOW VISIBLE AND CENTERED -->
+            <div class="w-full flex justify-center mb-6">
+                <div class="w-20 h-10 flex items-center justify-center rounded-full bg-red-600 shadow-xl border-2 border-red-800 transition duration-500">
+                    <span id="timer-countdown" class="text-2xl font-extrabold text-white">10</span>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center mb-6 text-gray-700 font-semibold text-lg sm:text-xl">
+                <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/১০</span>
+                <span id="score-display" class="text-lg sm:text-xl">স্কোর: ০</span>
+            </div>
+           
+            <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-8"></h2>
+            <div id="options-container" class="space-y-4">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-4">অভিনন্দন!</h2>
+            <p id="final-score-text" class="text-xl sm:text-2xl text-gray-700 mb-6 font-bold"></p>
+            
+            <!-- Answer Review Section -->
+            <div class="text-left mb-8 bg-gray-100 p-4 rounded-lg shadow-inner max-h-96 overflow-y-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">উত্তর পর্যালোচনা</h3>
+                <div id="review-container" class="space-y-4">
+                    <!-- Review items will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <p class="text-lg sm:text-xl text-gray-600 italic mb-8">ভালো লাগলে আমার আইডি ফলো করে রাখুন।</p>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <button id="restart-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">আবার খেলুন</button>
+                <button id="return-to-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
+            </div>
+        </div>
+
+        <!-- Merit List Page -->
+        <div id="merit-list-page" class="hidden">
+            <h3 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-8 text-center">মেধা তালিকা</h3>
+            <div class="bg-gray-50 rounded-lg p-6 shadow-inner mb-8">
+                <!-- Merit List Header -->
+                <div class="merit-list-header p-3 bg-gray-300 rounded-t-lg text-gray-700 border-b border-gray-400">
+                    <span>Rank</span>
+                    <span>নাম</span>
+                    <span class="text-right">স্কোর</span>
+                </div>
+                <!-- Merit List Items -->
+                <ul id="merit-list" class="divide-y divide-gray-200">
+                    <!-- Merit list items will be dynamically inserted here -->
+                </ul>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">PDF ডাউনলোড করুন</button>
+                <button id="go-back-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">ফিরে যান</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Global listeners to prevent copying and right-click
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('copy', (e) => { e.preventDefault(); showModal('কুইজের প্রশ্ন কপি করা যাবে না।'); });
+        document.addEventListener('cut', (e) => { e.preventDefault(); showModal('কুইজের প্রশ্ন কপি করা যাবে না।'); });
+
+        // Firebase কনফিগারেশন। এটি আপনার প্রজেক্টের সাথে যুক্ত করার জন্য প্রয়োজন।
+        // Firebase কনসোল থেকে এই কোডটি কপি করে এখানে পেস্ট করুন।
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRndsLdL_AT0VxJctOfWOR64410ceH91Q",
+            authDomain: "apps-89bec.firebaseapp.com",
+            projectId: "apps-89bec",
+            storageBucket: "apps-89bec.firebasestorage.app",
+            messagingSenderId: "460356178253",
+            appId: "1:460356178253:web:1f88da365acb445dbda704",
+            measurementId: "G-2QGC51N1X7"
+        };
+        
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
         let userId = null;
         let isAuthReady = false;
 
@@ -131,118 +184,258 @@
         const modal = document.getElementById('modal');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseBtn = document.getElementById('modal-close-btn');
+        const reviewContainer = document.getElementById('review-container');
+        const timerCountdown = document.getElementById('timer-countdown'); // Re-added UI element
+
 
         // Quiz state variables
         let currentQuestionIndex = 0;
         let score = 0;
         let meritListData = [];
+        let userAnswers = []; // To store user selections for review
+        let quizTimer;
+        const TIME_LIMIT = 10; // Time limit in seconds (Updated to 10)
         
+        // --- নতুন প্রশ্ন সেট হলে এটি পরিবর্তন করুন ---
+        const quizId = 'quiz-set-26'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
+        // --- ---
+
         // Quiz questions
         const questions = [
             {
-                question: "০১) 'শাশ্বত বঙ্গ' গ্রন্থটির রচয়িতা কে?",
-                options: ["কাজী মোতাহার হোসেন", "আবুল হুসেন", "কাজী আবদুল ওদুদ", "কাজী আনোয়ারুল কাদিও"],
-                answer: "কাজী আবদুল ওদুদ"
+                question: "১. 'ভাওয়াইয়া' বাংলাদেশের কোন অঞ্চলের গান?",
+                options: ["ক. রংপুর", "খ. বরিশাল", "গ. রাজশাহী", "ঘ. সিলেট"],
+                answer: "ক. রংপুর"
             },
             {
-                question: "০২) 'রেখাচিত্র' কার রচনা?",
-                options: ["গোলাম মোস্তাফা", "আবুল ফজল", "আবুল মনসুর আহমেদ", "বদরুদ্দীন ওমর"],
-                answer: "আবুল ফজল"
+                question: "২. বাংলাদেশে 'Mud Architecture' কোথায় বেশি দেখা যায়?",
+                options: ["ক. উত্তরবঙ্গে", "খ. কোস্টাল এলাকায়", "গ. পাহাড়ী এলাকায়", "ঘ. হাওড় এলাকায়"],
+                answer: "ক. উত্তরবঙ্গে"
             },
             {
-                question: "০৩) 'রেখাচিত্র' কোন জাতীয় রচনা?",
-                options: ["জীবনী", "আত্মজীবনী", "রম্যরচনা", "ভ্রমণকাহিনী"],
-                answer: "আত্মজীবনী"
+                question: "৩. 'ম্যাডোনা-৪৩' চিত্রকর্মটি কীসের ওপর আঁকা?",
+                options: ["ক. নায়িকা ম্যাডোনার ওপর", "খ. দুর্যোগের ওপর", "গ. চলচ্চিত্র পুরস্কারের ওপর", "ঘ. দুর্ভিক্ষের ওপর"],
+                answer: "ঘ. দুর্ভিক্ষের ওপর"
             },
             {
-                question: "০৪) বাংলা সাহিত্যের প্রথম সার্থক উপন্যাস কোনটি?",
-                options: ["দুর্গেশনন্দিনী", "বিষবৃক্ষ", "কপালকুণ্ডলা", "কৃষ্ণকান্তের উইল"],
-                answer: "দুর্গেশনন্দিনী"
+                question: "৪. পহেলা বৈশাখ উদযাপিত হয়-",
+                options: ["ক. ১৪ এপ্রিল", "খ. ২১ ফেব্রুয়ারি", "গ. ২৬ মার্চ", "ঘ. ১ এপ্রিল"],
+                answer: "ক. ১৪ এপ্রিল"
             },
             {
-                question: "০৫) বাংলা সাহিত্যের প্রথম মুসলিম ঔপন্যাসিক কে?",
-                options: ["মীর মশাররফ হোসেন", "ইসমাইল হোসেন সিরাজী", "কাজী ইমদাদুল হক", "শরৎচন্দ্র চট্টোপাধ্যায়"],
-                answer: "মীর মশাররফ হোসেন"
+                question: "৫. 'মনপুরা ৭০' কী?",
+                options: ["ক. একটি উপজেলা", "খ. একটি উপন্যাস", "গ. একটি চিত্রশিল্প", "ঘ. একটি নদী বন্দর"],
+                answer: "গ. একটি চিত্রশিল্প"
             },
             {
-                question: "০৬) 'নিয়তির খেলা' প্রবন্ধটির রচয়িতা কে?",
-                options: ["মোতাহের হোসেন চৌধুরী", "কাজী আব্দুল ওদুদ", "কাজী নজরুল ইসলাম", "প্রমথ চৌধুরী"],
-                answer: "কাজী নজরুল ইসলাম"
+                question: "৬. বিখ্যাত চিত্রকর্ম 'তিন কন্যা'-এর চিত্রকর কে?",
+                options: ["ক. জয়নুল আবেদিন", "খ. এস.এম. সুলতান", "গ. কামরুল হাসান", "ঘ. রফিকুন্নবী"],
+                answer: "গ. কামরুল হাসান"
             },
             {
-                question: "০৭) 'সবুজপত্র' পত্রিকাটি কত সালে প্রকাশিত হয়?",
-                options: ["১৯১৪", "১৯১৫", "১৯১৬", "১৯১৮"],
-                answer: "১৯১৪"
+                question: "৭. নববর্ষ 'পহেলা বৈশাখ' চালু করেছিলেন-",
+                options: ["ক. সম্রাট আকবর", "খ. সম্রাট শাহজাহান", "গ. লক্ষ্মণ সেন", "ঘ. বিজয় সেন"],
+                answer: "ক. সম্রাট আকবর"
             },
             {
-                question: "০৮) 'প্রমথ চৌধুরীর ছদ্মনাম কি ছিল?",
-                options: ["বীরবল", "শৌনক", "রূপচাঁদ", "সত্যপীর"],
-                answer: "বীরবল"
+                question: "৮. 'সংগ্রাম' চিত্রকর্মের শিল্পী কে?",
+                options: ["ক. এস এম সুলতান", "খ. কামরুল হাসান", "গ. জয়নুল আবেদিন", "ঘ. কাইয়ুম চৌধুরী"],
+                answer: "গ. জয়নুল আবেদিন"
             },
             {
-                question: "০৯) 'বিদ্রোহী' কবিতাটি কোন কাব্যগ্রন্থের অন্তর্ভুক্ত?",
-                options: ["অগ্নিবীণা", "বিষের বাঁশি", "সিন্ধু-হিন্দোল", "সর্বহারা"],
-                answer: "অগ্নিবীণা"
+                question: "৯. বাংলায় শিক্ষামূলক কার্টুন সিরিজ 'মীনা' কোন শিল্পীর সৃষ্টি?",
+                options: ["ক. তানভীর কবির", "খ. মুস্তাফা মনোয়ার", "গ. রফিকুন্নবী", "ঘ. মৃণাল হক"],
+                answer: "খ. মুস্তাফা মনোয়ার"
             },
             {
-                question: "১০) 'কবর' নাটকটি কে রচনা করেন?",
-                options: ["মুনীর চৌধুরী", "জসীমউদ্দীন", "শামসুর রাহমান", "সৈয়দ ওয়ালীউল্লাহ"],
-                answer: "মুনীর চৌধুরী"
+                question: "১০. বাংলাদেশে মণিপুরি নাচ কোন অঞ্চলের ঐতিহ্য?",
+                options: ["ক. সিলেট", "খ. রাজশাহী", "গ. ময়মনসিংহ", "ঘ. কুষ্টিয়া"],
+                answer: "ক. সিলেট"
+            },
+            {
+                question: "১১. 'রায়বেশে নৃত্য' শিল্পকর্মটি কার?",
+                options: ["ক. রশিদ চৌধুরী", "খ. রফিকুন নবী", "গ. জয়নুল আবেদীন", "ঘ. কামরুল হাসান"],
+                answer: "ঘ. কামরুল হাসান"
+            },
+            {
+                question: "১২. 'ম্যাডোনা ১৯৪৩' ছবিটির চিত্রশিল্পী কে?",
+                options: ["ক. এস এম সুলতান", "খ. জয়নুল আবেদিন", "গ. মুস্তাফা মনোয়ার", "ঘ. নিতুন কুণ্ডু"],
+                answer: "খ. জয়নুল আবেদিন"
+            },
+            {
+                question: "১৩. 'কফি হাউজের সেই আড্ডাটা আজ আর নেই'- মান্না দের গানটির এই গানটির কফি হাউজটি কোথায়?",
+                options: ["ক. কলকাতায়", "খ. মুম্বাইয়ে", "গ. ঢাকায়", "ঘ. বাঙ্গালোরে"],
+                answer: "ক. কলকাতায়"
+            },
+            {
+                question: "১৪. 'জন্ম আমার ধন্য হলো মাগো'-কালজয়ী এ গানটির গীতিকার কে?",
+                options: ["ক. মোহাম্মদ মনিরুজ্জামান", "খ. নয়ীম গহর", "গ. গোবিন্দ হালদার", "ঘ. আব্দুল লতিফ"],
+                answer: "গ. গোবিন্দ হালদার"
+            },
+            {
+                question: "১৫. 'জন্ম আমার ধন্য হলো'-গানটির সুরকার কী?",
+                options: ["ক. আজাদ রহমান", "খ. সমর দাস", "গ. সত্য সাহা", "ঘ. আলাউদ্দিন আলী"],
+                answer: "গ. সত্য সাহা"
+            },
+            {
+                question: "১৬. 'আকাশের ঐ মিটিমিটি তারার সাথে কইবো কথা'- এ গানটির রচয়িতা কে?",
+                options: ["ক. আবু হেনা মোস্তফা কামাল", "খ. গাজী মাজহারুল ইসলাম", "গ. কবি আজিজুর রহমান", "ঘ. সত্য সাহা"],
+                answer: "ক. আবু হেনা মোস্তফা কামাল"
+            },
+            {
+                question: "১৭. 'সুর সম্রাট' কাকে বলা হয়?",
+                options: ["ক. ওস্তাদ আয়াত আলী খাঁ", "খ. ওস্তাদ আলাউদ্দিন খাঁ", "গ. ওস্তাদ আকবর আলী খাঁ", "ঘ. ওস্তাদ বড়ে গোলাম আলী খাঁ"],
+                answer: "খ. ওস্তাদ আলাউদ্দিন খাঁ"
+            },
+            {
+                question: "১৮. 'আমার ভাইয়ের রক্তে রাঙানো একুশে ফেব্রুয়ারি আমি কি ভুলিতে পারি।'- এ গানের প্রথম সুরকার কে?",
+                options: ["ক. আবদুল গাফফার চৌধুরী", "খ. আলতাফ মাহমুদ", "গ. আসাদ চৌধুরী", "ঘ. আবদুল লতিফ"],
+                answer: "ঘ. আবদুল লতিফ"
+            },
+            {
+                question: "১৯. 'কেউ মালা, কেউ তসবি গলায়, তাইতো জাত ভিন্ন বলায়' এই পঙ্ক্তিটি নিচের একজনের লেখা-",
+                options: ["ক. লালন শাহ", "খ. মদন বাউল", "গ. সিরাজ সাঁই", "ঘ. পাগলা কানাই"],
+                answer: "ক. লালন শাহ"
+            },
+            {
+                question: "২০. 'প্রাণের বান্ধবরে বুড়ি হইলাম তোর কারণে'- গানটির গীতিকার-",
+                options: ["ক. শেখ ওয়াহিদ", "খ. শাহ আবদুল করিম", "গ. কিরণ রায়", "ঘ. কাঙ্গালিনী সুফিয়া"],
+                answer: "ক. শেখ ওয়াহিদ"
+            },
+            {
+                question: "২১. 'শোনো একটি মুজিবরের কণ্ঠ থেকে, লক্ষ মুজিবরের কণ্ঠ স্বরের ধ্বনি প্রতিধ্বনি, আকাশে বাতাসে উঠে রণি' এই গানটির গীতিকার কে?",
+                options: ["ক. মোহাম্মদ মনিরুজ্জামান", "খ. গাজী মাজহারুল আনোয়ার", "গ. গৌরীপ্রসন্ন মজুমদার", "ঘ. আবু হেনা মোস্তফা কামাল"],
+                answer: "গ. গৌরীপ্রসন্ন মজুমদার"
+            },
+            {
+                question: "২২. গম্ভীরা বাংলাদেশের কোন অঞ্চলের লোকসঙ্গীত?",
+                options: ["ক. চট্টগ্রাম", "খ. রাঙামাটি", "গ. চাঁপাইনবাবগঞ্জ", "ঘ. জামালপুর"],
+                answer: "গ. চাঁপাইনবাবগঞ্জ"
             }
         ];
-
+        
         // --- Authentication ---
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                try {
-                    await (initialAuthToken ? signInWithCustomToken(auth, initialAuthToken) : signInAnonymously(auth));
-                } catch (error) {
-                    console.error("Firebase Auth Error:", error);
-                    showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
-                }
-            } else {
-                userId = user.uid;
-                isAuthReady = true;
-                setupMeritListListener();
-            }
+        auth.signInAnonymously().then((userCredential) => {
+            userId = userCredential.user.uid;
+            isAuthReady = true;
+            // Auth সফল হলেই Merit List Listener সেট করা হবে (Workaround for Permission Error)
+            setupMeritListListener(); 
+        }).catch((error) => {
+            console.error("Firebase Auth Error:", error);
+            showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
         });
+
+        // --- Timer Functions ---
+        const startTimer = () => {
+            let timeLeft = TIME_LIMIT;
+            timerCountdown.textContent = timeLeft;
+            timerCountdown.parentNode.classList.remove('bg-yellow-600', 'bg-green-600');
+            timerCountdown.parentNode.classList.add('bg-red-600');
+            
+            if (quizTimer) clearInterval(quizTimer);
+
+            quizTimer = setInterval(() => {
+                timeLeft--;
+                timerCountdown.textContent = timeLeft;
+                
+                if (timeLeft <= 3 && timeLeft > 0) { // Changed threshold for yellow warning
+                     timerCountdown.parentNode.classList.remove('bg-red-600');
+                     timerCountdown.parentNode.classList.add('bg-yellow-600');
+                }
+                if (timeLeft === 0) {
+                     timerCountdown.parentNode.classList.remove('bg-yellow-600');
+                     timerCountdown.parentNode.classList.add('bg-green-600');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(quizTimer);
+                    handleAnswer(null); // Time's up
+                }
+            }, 1000);
+        };
+
+        const clearTimer = () => {
+            if (quizTimer) {
+                clearInterval(quizTimer);
+                quizTimer = null;
+            }
+        };
 
         // --- Merit List ---
         const setupMeritListListener = () => {
             if (!isAuthReady) return;
-            const collectionPath = `artifacts/${appId}/public/data/quiz_results`;
-            const meritListRef = collection(db, collectionPath);
-            const q = query(meritListRef);
-
-            onSnapshot(q, (snapshot) => {
+            // Collection path: quiz_results/{quizId}/scores
+            const meritListRef = db.collection('quiz_results').doc(quizId).collection('scores');
+            
+            meritListRef.orderBy('score', 'desc').onSnapshot(snapshot => {
                 const results = [];
                 snapshot.forEach(doc => {
-                    results.push(doc.data());
+                    // Store the document ID with data for later deletion/update
+                    const data = doc.data();
+                    data.docId = doc.id; 
+                    results.push(data);
+                });
+                // Sort by score (descending) then by timestamp (ascending for tie-breaker)
+                results.sort((a, b) => {
+                    if (b.score !== a.score) {
+                        return b.score - a.score;
+                    }
+                    // Handle timestamp tie-breaker (earlier submission wins)
+                    if (a.timestamp && b.timestamp) {
+                        return a.timestamp.toDate() - b.timestamp.toDate();
+                    }
+                    return 0;
                 });
 
-                results.sort((a, b) => b.score - a.score);
                 meritListData = results;
                 renderMeritList();
-            }, (error) => {
+            }, error => {
                 console.error("Merit list fetch error:", error);
+                // Security Rule-এর সমস্যার কারণে এই ত্রুটিটি আসতে পারে
+                showModal("মেধা তালিকা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে নিশ্চিত করুন যে Firebase Security Rules সঠিকভাবে সেট করা আছে।");
             });
+        };
+
+        const getRankDesign = (index) => {
+            if (index === 0) return 'bg-yellow-400 text-yellow-900 border-yellow-500 font-extrabold shadow-lg';
+            if (index === 1) return 'bg-gray-400 text-gray-900 border-gray-500 font-bold shadow-md';
+            if (index === 2) return 'bg-orange-300 text-orange-900 border-orange-400 font-semibold shadow';
+            return 'bg-gray-100 text-gray-700 border-gray-300';
         };
 
         const renderMeritList = () => {
             meritList.innerHTML = '';
             if (meritListData.length === 0) {
-                meritList.innerHTML = `<li class="text-center text-gray-500 italic">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
+                meritList.innerHTML = `<li class="text-center text-gray-500 italic p-4">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
                 return;
             }
+            
+            // --- Implement Rank Sharing Logic ---
+            let currentRank = 1;
+            let currentScore = -1;
+            
             meritListData.forEach((result, index) => {
+                // Determine rank based on previous score
+                if (result.score < currentScore) {
+                    currentRank = index + 1; // Increment rank if score is lower than previous
+                }
+                currentScore = result.score; // Update current score
+
+                const rankText = currentRank === 1 ? '১ম' : 
+                                 currentRank === 2 ? '২য়' : 
+                                 currentRank === 3 ? '৩য়' : 
+                                 currentRank + '.'; // Using period for other ranks
+                                 
+                // Note: Rank class uses (currentRank - 1) to map 1st, 2nd, 3rd to indices 0, 1, 2
+                const rankClass = getRankDesign(currentRank - 1); 
+
                 const li = document.createElement('li');
-                li.className = `flex justify-between items-center p-4 rounded-lg text-lg ${index === 0 ? 'bg-yellow-200 font-bold' : 'bg-white'}`;
+                li.className = `merit-list-item p-4 text-lg border-b ${rankClass} transition duration-150`;
+                
                 li.innerHTML = `
-                    <span class="flex-grow flex items-center min-w-0">
-                        <span class="w-8 text-center text-gray-600 mr-2 flex-shrink-0">${index + 1}.</span>
-                        <span class="truncate">${result.name}</span>
-                    </span>
-                    <span class="font-bold text-gray-800 ml-4">${result.score}/${questions.length}</span>
+                    <span class="text-center font-extrabold">${rankText}</span>
+                    <span class="truncate">${result.name}</span>
+                    <span class="font-bold text-right">${result.score}/${questions.length}</span>
                 `;
                 meritList.appendChild(li);
             });
@@ -258,10 +451,12 @@
             showScreen('quiz');
             currentQuestionIndex = 0;
             score = 0;
+            userAnswers = []; // Reset user answers
             renderQuestion();
         };
 
         const renderQuestion = () => {
+            clearTimer();
             if (currentQuestionIndex >= questions.length) {
                 showResults();
                 return;
@@ -276,53 +471,108 @@
             currentQuestion.options.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
-                button.className = "w-full p-5 rounded-lg text-left text-lg font-medium text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:scale-105 transform transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300";
+                // Updated Smart Button Design
+                button.className = "w-full p-5 rounded-xl text-left text-lg font-medium text-white bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 transform transition duration-200 hover:scale-[1.03] focus:outline-none shadow-lg hover:shadow-xl active:scale-[1.01]";
                 button.addEventListener('click', () => handleAnswer(option));
                 optionsContainer.appendChild(button);
             });
+
+            startTimer();
         };
 
         const handleAnswer = (selectedOption) => {
+            clearTimer();
             const currentQuestion = questions[currentQuestionIndex];
             const optionButtons = optionsContainer.querySelectorAll('button');
-            
+            const isCorrect = selectedOption === currentQuestion.answer;
+
+            // Store the result for review
+            userAnswers.push({
+                question: currentQuestion.question,
+                correctAnswer: currentQuestion.answer,
+                userSelected: selectedOption === null ? 'সময় শেষ' : selectedOption,
+                isCorrect: isCorrect
+            });
+
             optionButtons.forEach(btn => {
                 btn.disabled = true;
                 if (btn.textContent === currentQuestion.answer) {
-                    btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-500', 'hover:scale-105');
-                    btn.classList.add('bg-green-600');
+                    // Correct answer (Green)
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-700', 'to-indigo-700', 'hover:from-blue-600', 'hover:to-indigo-600', 'hover:scale-[1.03]');
+                    btn.classList.add('bg-green-600', 'shadow-lg');
                 } else if (btn.textContent === selectedOption) {
-                    btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-500', 'hover:scale-105');
-                    btn.classList.add('bg-red-600');
+                    // Wrong answer selected (Red)
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-700', 'to-indigo-700', 'hover:from-blue-600', 'hover:to-indigo-600', 'hover:scale-[1.03]');
+                    btn.classList.add('bg-red-600', 'shadow-lg');
+                } else {
+                     // Dim unselected wrong options
+                     btn.classList.add('opacity-50');
                 }
             });
-
-            if (selectedOption === currentQuestion.answer) {
+            
+            // If time is up, show correct answer but don't count score
+            if (selectedOption !== null && isCorrect) {
                 score++;
             }
 
             setTimeout(() => {
                 currentQuestionIndex++;
                 renderQuestion();
-            }, 1000);
+            }, 1500); // Wait a bit longer to see the result
         };
 
+        const renderQuizReview = () => {
+            reviewContainer.innerHTML = '';
+            userAnswers.forEach((answer, index) => {
+                const reviewItem = document.createElement('div');
+                const isCorrect = answer.isCorrect;
+                const textColor = isCorrect ? 'text-green-700' : 'text-red-700';
+                const bgColor = isCorrect ? 'bg-green-50' : 'bg-red-50';
+                const icon = isCorrect ? '✅' : '❌';
+                const selectedText = answer.userSelected === null ? 'সময় শেষ, উত্তর দেননি।' : answer.userSelected;
+
+                reviewItem.className = `p-4 rounded-lg border ${bgColor}`;
+                reviewItem.innerHTML = `
+                    <p class="font-bold text-lg mb-2 ${textColor}">${index + 1}. ${answer.question} <span class="float-right">${icon}</span></p>
+                    <p class="text-sm">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
+                    <p class="text-sm">সঠিক উত্তর: <span class="text-green-600 font-semibold">${answer.correctAnswer}</span></p>
+                `;
+                reviewContainer.appendChild(reviewItem);
+            });
+        };
+
+
         const showResults = async () => {
+            clearTimer(); // Just in case
             showScreen('results');
             finalScoreText.textContent = `আপনার স্কোর: ${score}/${questions.length}`;
+            renderQuizReview(); // Show the review section
             
             if (isAuthReady) {
                 loadingScreen.classList.remove('hidden');
-                const collectionPath = `artifacts/${appId}/public/data/quiz_results`;
                 try {
-                    await addDoc(collection(db, collectionPath), {
+                    const scoresRef = db.collection('quiz_results').doc(quizId).collection('scores');
+                    
+                    // 1. Check for existing score from this user
+                    const existingScoreQuery = await scoresRef.where('userId', '==', userId).get();
+                    
+                    if (!existingScoreQuery.empty) {
+                        // 2. If existing score found, delete it to ensure only one entry per user
+                        const docToDelete = existingScoreQuery.docs[0].id;
+                        await scoresRef.doc(docToDelete).delete();
+                    }
+
+                    // 3. Save the new score
+                    await scoresRef.add({
+                        userId: userId, // Add userId to track the user
                         name: userNameInput.value.trim(),
                         score: score,
-                        timestamp: serverTimestamp()
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
+
                 } catch (e) {
                     console.error("Error adding document: ", e);
-                    showModal("ফলাফল সংরক্ষণ করতে সমস্যা হয়েছে।");
+                    showModal("ফলাফল সংরক্ষণ করতে সমস্যা হয়েছে। অনুগ্রহ করে Firebase Rules চেক করুন।");
                 } finally {
                     loadingScreen.classList.add('hidden');
                 }
@@ -357,34 +607,46 @@
         const downloadPDF = () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+
+            // 1. Set Title Font Size larger
+            doc.setFontSize(16); 
             
-            // PDF-এর জন্য বাংলা ফন্ট যুক্ত করুন
-            // আপনার Base64-এনকোডেড ফন্ট ডেটা এখানে পেস্ট করুন।
-            // উদাহরণস্বরূপ, Noto Sans Bengali ফন্টের জন্য এইরকম ডেটা দরকার।
-            const bengaliFontBase64 = "<!-- এখানে Base64 ফন্ট ডেটা বসবে -->"; // উদাহরণ
-
-            doc.addFileToVFS('NotoSansBengali-Regular.ttf', bengaliFontBase64);
-            doc.addFont('NotoSansBengali-Regular.ttf', 'NotoSansBengali', 'normal');
-            doc.setFont('NotoSansBengali');
-
-            // টেবিলের হেডার ঠিক করা হয়েছে
-            const tableColumn = ["ক্রমিক নং", "নাম", "স্কোর"];
+            // Bangla font is completely removed from PDF logic to ensure clear English output
+            const tableColumn = ["Rank", "Name", "Score"];
             const tableRows = [];
             
+            let currentRank = 1;
+            let currentScore = -1;
+
             meritListData.forEach((item, index) => {
-                const row = [index + 1, item.name, `${item.score}/${questions.length}`];
+                if (item.score < currentScore) {
+                    currentRank = index + 1;
+                }
+                currentScore = item.score;
+                
+                const rankText = currentRank === 1 ? '1st' : 
+                                 currentRank === 2 ? '2nd' : 
+                                 currentRank === 3 ? '3rd' : 
+                                 currentRank + '.';
+
+                const row = [rankText, item.name, `${item.score}/${questions.length}`];
                 tableRows.push(row);
             });
             
-            doc.text("কুইজের মেধা তালিকা", 14, 20);
+            doc.text("Quiz Merit List", 14, 20);
             
             doc.autoTable({ 
                 head: [tableColumn], 
                 body: tableRows, 
                 startY: 25,
-                didDrawPage: function (data) {
-                    // This is to ensure the font is set on every page
-                    doc.setFont('NotoSansBengali');
+                // 2. Increase font size for body and header
+                styles: { 
+                    fontSize: 12, // Increased font size for body cells
+                    cellPadding: 3,
+                },
+                headStyles: {
+                    fontSize: 14, // Increased font size for header
+                    fillColor: [52, 73, 94] 
                 }
             });
             doc.save('quiz_merit_list.pdf');
