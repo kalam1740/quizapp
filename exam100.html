@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> কুইজ -২১</title>
+    <title>পরীক্ষা-২২</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -108,7 +108,9 @@
                 </div>
             </div>
 
-            <p class="text-lg sm:text-xl text-gray-600 italic mb-8">ভালো লাগলে আমার আইডি ফলো করে রাখুন।</p>
+            <!-- HIGHLIGHTED FOLLOW MESSAGE -->
+            <p class="text-2xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg">ভালো লাগলে আমার আইডি ফলো করে রাখুন।</p>
+            
             <div class="flex flex-col sm:flex-row gap-6 justify-center">
                 <button id="restart-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">আবার খেলুন</button>
                 <button id="return-to-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
@@ -197,60 +199,80 @@
         const TIME_LIMIT = 10; // Time limit in seconds (Updated to 10)
         
         // --- নতুন প্রশ্ন সেট হলে এটি পরিবর্তন করুন ---
-        const quizId = 'quiz-set-28'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
+        const quizId = 'quiz-set-29'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
         // --- ---
 
         // Quiz questions
         const questions = [
             {
-                question: "১. গণপ্রজাতন্ত্রী বাংলাদেশের সর্বোচ্চ আইন কী?",
-                options: ["ক. রাষ্ট্রপতির আদেশ", "খ. সংবিধান", "গ. সুপ্রিম কোর্ট", "ঘ. স্পিকার"],
-                answer: "খ. সংবিধান"
+                question: "১. Which of the following is a proper noun?",
+                options: ["ক. Car", "খ. Fast", "গ. Rain", "ঘ. Rabindranath"],
+                answer: "ঘ. Rabindranath"
             },
             {
-                question: "২. বাংলাদেশে কবে প্রথম সংসদীয় গণতন্ত্র প্রবর্তন করা হয়?",
-                options: ["ক. ১৯৯১ সালে", "খ. ১৯৭২ সালে", "গ. ২০০১ সালে", "ঘ. ১৯৮২ সালে"],
-                answer: "খ. ১৯৭২ সালে"
+                question: "২. Which is not a proper noun? (১০তম বিসিএস)",
+                options: ["ক. Sun", "খ. River", "গ. Karim", "ঘ. Padma"],
+                answer: "খ. River" // Padma and Sun are also Proper Nouns (specific names). River is Common.
             },
             {
-                question: "৩. বাংলাদেশের অস্থায়ী সংবিধান আদেশ জারি করেন কে?",
-                options: ["ক. শেখ মুজিবুর রহমান", "খ. সৈয়দ নজরুল ইসলাম", "গ. খন্দকার মোস্তাক", "ঘ. মোহাম্মদ উল্লাহ"],
-                answer: "ক. শেখ মুজিবুর রহমান"
+                question: "৩. Which underlined word is a noun?",
+                options: ["ক. That is the last of the butter.", "খ. This is the last bus.", "গ. He came last in the race", "ঘ. This lesson will not last long."],
+                answer: "ক. That is the last of the butter." // Last here means the remaining part (noun)
             },
             {
-                question: "৪. বাংলাদেশের অস্থায়ী সংবিধান আদেশ কত তারিখে জারি করা হয়?",
-                options: ["ক. ১৯৭২ সালের ২৩ মার্চ", "খ. ১৯৭২ সালের ১২ অক্টোবর", "গ. ১৯৭২ সালের ৪ নভেম্বর", "ঘ. ১৯৭২ সালের ১১ জানুয়ারি"],
-                answer: "ঘ. ১৯৭২ সালের ১১ জানুয়ারি"
+                question: "৪. Noun মোট কত প্রকার?",
+                options: ["ক. ৫", "খ. ৬", "গ. ৪", "ঘ. ৩"],
+                answer: "ক. ৫"
             },
             {
-                question: "৫. গণপরিষদ আদেশ জারি করা হয়-",
-                options: ["ক. ২৩ মার্চ, ১৯৭২", "খ. ১৩ এপ্রিল, ১৯৭২", "গ. ২৩ মে, ১৯৭২", "ঘ. ২৪ জুন, ১৯৭২"],
-                answer: "ক. ২৩ মার্চ, ১৯৭২"
+                question: "৫. What kind of noun is \"Journey\"?",
+                options: ["ক. proper", "খ. collective", "গ. abstract", "ঘ. common"],
+                answer: "ঘ. common"
             },
             {
-                question: "৬. বাংলাদেশ গণপরিষদের প্রথম অধিবেশন কত তারিখে শুরু হয়?",
-                options: ["ক. ৭ এপ্রিল, ১৯৭২", "খ. ১০ এপ্রিল, ১৯৭২", "গ. ৭ এপ্রিল, ১৯৭৩", "ঘ. ১০ এপ্রিল, ১৯৭৩"],
-                answer: "খ. ১০ এপ্রিল, ১৯৭২"
+                question: "৬. I recognized your voice. The underline word is a/an-",
+                options: ["ক. Common noun", "খ. Proper noun", "গ. Collective noun", "ঘ. Abstract noun"],
+                answer: "ঘ. Abstract noun" // Assuming 'voice' is the underlined word, which is an Abstract noun (cannot be touched).
             },
             {
-                question: "৭. বাংলাদেশের সংবিধান রচিত হয়-",
-                options: ["ক. সাধারণ আইন পরিষদের মাধ্যমে", "খ. গণপরিষদের মাধ্যমে", "গ. গণবিপ্লবের মাধ্যমে", "ঘ. রাষ্ট্রপতির আদেশ বলে"],
-                answer: "খ. গণপরিষদের মাধ্যমে"
+                question: "৭. Which of the following is abstract noun?",
+                options: ["ক. Childhood", "খ. Child", "গ. Boy", "ঘ. Family"],
+                answer: "ক. Childhood"
             },
             {
-                question: "৮. বাংলাদেশ গণপরিষদের সংসদ নেতা কে ছিলেন?",
-                options: ["ক. জনাব তাজউদ্দিন আহমদ", "খ. সৈয়দ নজরুল ইসলাম", "গ. বঙ্গবন্ধু শেখ মুজিবুর রহমান", "ঘ. ক্যাপ্টেন মনসুর আলী"],
-                answer: "গ. বঙ্গবন্ধু শেখ মুজিবুর রহমান"
+                question: "৮. Which one is the noun form?",
+                options: ["ক. horrible", "খ. horror", "গ. horrify", "ঘ. horribly"],
+                answer: "খ. horror"
             },
             {
-                question: "৯. বাংলাদেশ গণপরিষদের প্রথম স্পীকার ছিলেন-",
-                options: ["ক. মোহাম্মদ উল্লাহ", "খ. শাহ আব্দুল হামিদ", "গ. ড. কামাল হোসেন", "ঘ. মওলানা আব্দুর রশিদ তর্কবাগিশ"],
-                answer: "খ. শাহ আব্দুল হামিদ"
+                question: "৯. A herd of cattle is passing. The underlined word is-",
+                options: ["ক. adjective", "খ. common noun", "গ. collective noun", "ঘ. abstract noun"],
+                answer: "গ. collective noun" // Assuming 'herd' is the underlined word
             },
             {
-                question: "১০. বাংলাদেশ সংবিধান রচনা কমিটির সদস্য ছিলেন কত জন?",
-                options: ["ক. ৩১", "খ. ৩২", "গ. ৩৪", "ঘ. ৩৩"],
-                answer: "গ. ৩৪"
+                question: "১০. Noun of the word 'poor' is-",
+                options: ["ক. poorness", "খ. poverty", "গ. poority", "ঘ. poor"],
+                answer: "খ. poverty"
+            },
+            {
+                question: "১১. কোনটি Abstract noun?",
+                options: ["ক. City", "খ. Boy", "গ. Obey", "ঘ. Humility (নম্রতা)"],
+                answer: "ঘ. Humility (নম্রতা)"
+            },
+            {
+                question: "১২. কোনটি Material Noun? (প্রাথমিক সহকারী শিক্ষক-১২)",
+                options: ["ক. Wood", "খ. Mouth", "গ. Team", "ঘ. Class"],
+                answer: "ক. Wood"
+            },
+            {
+                question: "১৩. কোনটি Abstract noun?",
+                options: ["ক. Knife", "খ. manhood", "গ. Shamim", "ঘ. Team"],
+                answer: "খ. manhood"
+            },
+            {
+                question: "১৪. What is the (deep) of the canal?",
+                options: ["ক. deepest", "খ. deeper", "গ. deepts", "ঘ. depth"],
+                answer: "ঘ. depth" // Noun form of deep is depth
             }
         ];
         
@@ -283,7 +305,7 @@
                      timerCountdown.parentNode.classList.add('bg-yellow-600');
                 }
                 if (timeLeft === 0) {
-                     timerCountdown.parentNode.classList.remove('bg-yellow-600');
+                     timerCountdown.parentNode.classList.remove('bg-red-600');
                      timerCountdown.parentNode.classList.add('bg-green-600');
                 }
 
