@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>পরীক্ষা-২২</title>
+    <title>পরীক্ষা-২৩</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -85,7 +85,7 @@
             </div>
             
             <div class="flex justify-between items-center mb-6 text-gray-700 font-semibold text-lg sm:text-xl">
-                <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/১০</span>
+                <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/২০</span>
                 <span id="score-display" class="text-lg sm:text-xl">স্কোর: ০</span>
             </div>
            
@@ -108,8 +108,15 @@
                 </div>
             </div>
 
-            <!-- HIGHLIGHTED FOLLOW MESSAGE -->
-            <p class="text-2xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg">ভালো লাগলে আমার আইডি ফলো করে রাখুন।</p>
+            <!-- HIGHLIGHTED FOLLOW MESSAGE AND LINK -->
+            <div class="mb-8">
+                <p class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg mb-4">
+                    ভালো লাগলে আমার আইডি ফলো করে রাখুন।
+                </p>
+                <a href="https://www.facebook.com/share/16WqmPLahJ/" target="_blank" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105 shadow-md">
+                    আমার আইডি লিংক
+                </a>
+            </div>
             
             <div class="flex flex-col sm:flex-row gap-6 justify-center">
                 <button id="restart-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">আবার খেলুন</button>
@@ -199,80 +206,110 @@
         const TIME_LIMIT = 10; // Time limit in seconds (Updated to 10)
         
         // --- নতুন প্রশ্ন সেট হলে এটি পরিবর্তন করুন ---
-        const quizId = 'quiz-set-29'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
+        const quizId = 'quiz-set-30'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
         // --- ---
 
         // Quiz questions
         const questions = [
             {
-                question: "১. Which of the following is a proper noun?",
-                options: ["ক. Car", "খ. Fast", "গ. Rain", "ঘ. Rabindranath"],
-                answer: "ঘ. Rabindranath"
+                question: "১. বাংলাদেশ সংবিধান সর্বপ্রথম কোন তারিখে গণপরিষদে উত্থাপিত হয়? (৪২তম /১৪তম বিসিএস)",
+                options: ["ক. ১২ অক্টোবর, ১৯৭২ সালে", "খ. ১৬ ডিসেম্বর, ১৯৭২ সালে", "গ. ২৬ মার্চ, ১৯৭৩ সালে", "ঘ. ১৬ ডিসেম্বর, ১৯৭৩ সালে"],
+                answer: "ক. ১২ অক্টোবর, ১৯৭২ সালে"
             },
             {
-                question: "২. Which is not a proper noun? (১০তম বিসিএস)",
-                options: ["ক. Sun", "খ. River", "গ. Karim", "ঘ. Padma"],
-                answer: "খ. River" // Padma and Sun are also Proper Nouns (specific names). River is Common.
+                question: "২. বাংলাদেশের সংবিধান কোন তারিখে গণপরিষদে গৃহীত হয়? (বাংলাদেশ টেলিভিশনের উপ-সহকারী প্রকৌশলী: ২৩/ খাদ্য অধিদপ্তরের উপ-সহকারী প্রকৌশলী: ২২/ এনএসআই এর ওয়াচার কনস্টেবল: ২১।)",
+                options: ["ক. ২ অক্টোবর, ১৯৭১", "খ. ১৬ ডিসেম্বর, ১৯৭২", "গ. ৪ নভেম্বর, ১৯৭২", "ঘ. ৪ জানুয়ারি, ১৯৭৩"],
+                answer: "গ. ৪ নভেম্বর, ১৯৭২"
             },
             {
-                question: "৩. Which underlined word is a noun?",
-                options: ["ক. That is the last of the butter.", "খ. This is the last bus.", "গ. He came last in the race", "ঘ. This lesson will not last long."],
-                answer: "ক. That is the last of the butter." // Last here means the remaining part (noun)
+                question: "৩. গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধান দিবস কত তারিখে? (সিনিয়র স্টাফ নার্স: ২৩/ সিনিয়র স্টাফ নার্স: ২৩])",
+                options: ["ক. ১৬ ডিসেম্বর", "খ. ৭ মার্চ", "গ. ২৩ অক্টোবর", "ঘ. ৪ নভেম্বর"],
+                answer: "ঘ. ৪ নভেম্বর"
             },
             {
-                question: "৪. Noun মোট কত প্রকার?",
-                options: ["ক. ৫", "খ. ৬", "গ. ৪", "ঘ. ৩"],
-                answer: "ক. ৫"
+                question: "৪. বাংলাদেশের সংবিধান গৃহীত হওয়ার সময় রাষ্ট্রপতি কে ছিলেন? (জাহাঙ্গীরনগর বিশ্ববিদ্যালয়: ১৩-১৪/ জগন্নাথ বিশ্ববিদ্যালয়: ০৫-০৬])",
+                options: ["ক. মোহাম্মদ উল্লাহ", "খ. শেখ মুজিবুর রহমান", "গ. বিচারপতি আবু সাঈদ চৌধুরী", "ঘ. বিচারপতি আহসান উদ্দীন চৌধুরী"],
+                answer: "গ. বিচারপতি আবু সাঈদ চৌধুরী"
             },
             {
-                question: "৫. What kind of noun is \"Journey\"?",
-                options: ["ক. proper", "খ. collective", "গ. abstract", "ঘ. common"],
-                answer: "ঘ. common"
+                question: "৫. গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধান প্রবর্তিত হয়- (৪০তম বিসিএস/২০তম বিসিএস)",
+                options: ["ক. ২৫ মার্চ, ১৯৭১", "খ. ২৫ মার্চ, ১৯৭২", "গ. ১৬ ডিসেম্বর, ১৯৭১", "ঘ. ১৬ ডিসেম্বর, ১৯৭২"],
+                answer: "ঘ. ১৬ ডিসেম্বর, ১৯৭২"
             },
             {
-                question: "৬. I recognized your voice. The underline word is a/an-",
-                options: ["ক. Common noun", "খ. Proper noun", "গ. Collective noun", "ঘ. Abstract noun"],
-                answer: "ঘ. Abstract noun" // Assuming 'voice' is the underlined word, which is an Abstract noun (cannot be touched).
+                question: "৬. বাংলাদেশের সংবিধান কোন সনে প্রণীত হয়? (রাবি: ১৯-২০)",
+                options: ["ক. ১৯৭২ সালে", "খ. ১৯৭৫ সালে", "গ. ১৯৮০ সালে", "ঘ. ১৯৫২ সালে"],
+                answer: "ক. ১৯৭২ সালে"
             },
             {
-                question: "৭. Which of the following is abstract noun?",
-                options: ["ক. Childhood", "খ. Child", "গ. Boy", "ঘ. Family"],
-                answer: "ক. Childhood"
+                question: "৭. ১৯৭২ সালের বাংলাদেশের সংবিধানের রাষ্ট্রীয় মূলনীতি- (যুব উন্নয়ন অধিদপ্তরের যুব উন্নয়ন কর্মকর্তা: ২২/ দুদক এর কোর্ট পরিদর্শক: ২২])",
+                options: ["ক. গণতন্ত্র, সমাজতন্ত্র, জাতীয়তাবাদ, ধর্ম নিরপেক্ষতা", "খ. ধর্ম নিরপেক্ষতা, সমাজতন্ত্র, গণতন্ত্র, জাতীয়তাবাদ", "গ. জাতীয়তাবাদ, সমাজতন্ত্র, গণতন্ত্র, ধর্ম নিরপেক্ষতা", "ঘ. জাতীয়তাবাদ, ধর্ম নিরপেক্ষতা, সমাজতন্ত্র, গণতন্ত্র"],
+                answer: "গ. জাতীয়তাবাদ, সমাজতন্ত্র, গণতন্ত্র, ধর্ম নিরপেক্ষতা"
             },
             {
-                question: "৮. Which one is the noun form?",
-                options: ["ক. horrible", "খ. horror", "গ. horrify", "ঘ. horribly"],
-                answer: "খ. horror"
+                question: "৮. ১৯৭২ সালের বাংলাদেশ সংবিধানের মূলনীতিগুলোর একটি হলো- (চট্টগ্রাম বিশ্ববিদ্যালয়: ১৫-১৬/)",
+                options: ["ক. ধনতন্ত্র", "খ. একনায়কতন্ত্র", "গ. গণতন্ত্র", "ঘ. রাজতন্ত্র"],
+                answer: "গ. গণতন্ত্র"
             },
             {
-                question: "৯. A herd of cattle is passing. The underlined word is-",
-                options: ["ক. adjective", "খ. common noun", "গ. collective noun", "ঘ. abstract noun"],
-                answer: "গ. collective noun" // Assuming 'herd' is the underlined word
+                question: "৯. কোনটি ১৯৭২ সালের 'বাংলাদেশ সংবিধান' এর মূলনীতি ছিল না? (রাজশাহী বিশ্ববিদ্যালয়: ১৭-১৮)",
+                options: ["ক. সামাজিক ন্যায়বিচার", "খ. গণতন্ত্র", "গ. ধর্ম নিরপেক্ষতা", "ঘ. জাতীয়তাবাদ"],
+                answer: "ক. সামাজিক ন্যায়বিচার"
             },
             {
-                question: "১০. Noun of the word 'poor' is-",
-                options: ["ক. poorness", "খ. poverty", "গ. poority", "ঘ. poor"],
-                answer: "খ. poverty"
+                question: "১০. বাংলাদেশের হস্তলিখিত সংবিধানে প্রথম স্বাক্ষর করেন কে? (এনএসআই এর ফিল্ড অফিসার: ২৩/)",
+                options: ["ক. ড. কামাল হোসেন", "খ. বেগম রাজিয়া বানু", "গ. শেখ মুজিবুর রহমান", "ঘ. আবু সায়ীদ চৌধুরী"],
+                answer: "গ. শেখ মুজিবুর রহমান"
             },
             {
-                question: "১১. কোনটি Abstract noun?",
-                options: ["ক. City", "খ. Boy", "গ. Obey", "ঘ. Humility (নম্রতা)"],
-                answer: "ঘ. Humility (নম্রতা)"
+                question: "১১. বাংলাদশে সংবিধান দুষ্পরিবর্তনীয় কেন? (সংস্থাপন মন্ত্রণালয়ের প্রশাসনিক কর্মকর্তা: ০৭)",
+                options: ["ক. পরিবর্তন সহজ নয় বলে", "খ. নাতিদীর্ঘ বলে", "গ. লিখিত আকারে লিপিবদ্ধ বলে", "ঘ. পরিবর্তনে দক্ষতার অভাব"],
+                answer: "ক. পরিবর্তন সহজ নয় বলে"
             },
             {
-                question: "১২. কোনটি Material Noun? (প্রাথমিক সহকারী শিক্ষক-১২)",
-                options: ["ক. Wood", "খ. Mouth", "গ. Team", "ঘ. Class"],
-                answer: "ক. Wood"
+                question: "১২. বাংলাদেশের সংবিধানে কয়টি ভাগ আছে? (ঢাবি: ১৭-১৮/)",
+                options: ["ক. ৯", "খ. ১০", "গ. ১১", "ঘ. ১২"],
+                answer: "গ. ১১"
             },
             {
-                question: "১৩. কোনটি Abstract noun?",
-                options: ["ক. Knife", "খ. manhood", "গ. Shamim", "ঘ. Team"],
-                answer: "খ. manhood"
+                question: "১৩. গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধানে কতটি অনুচ্ছেদ আছে? (সুপ্রীম কোর্টের প্রটোকল অফিসার: ২৩/ দুদক এর কোর্ট পরিদর্শক: ২২)",
+                options: ["ক. ১৫৬", "খ. ১৫৫", "গ. ১৫৩", "ঘ. ১৫২"],
+                answer: "গ. ১৫৩"
             },
             {
-                question: "১৪. What is the (deep) of the canal?",
-                options: ["ক. deepest", "খ. deeper", "গ. deepts", "ঘ. depth"],
-                answer: "ঘ. depth" // Noun form of deep is depth
+                question: "১৪. গণপ্রজাতন্ত্রী বাংলাদেশ সংবিধানে কতটি তফসিল রয়েছে? (৩৯তম বিসিএস/ বিআরটিএ'র মোটরযান পরিদর্শক: ১৭/)",
+                options: ["ক. ৫টি", "খ. ৭টি", "গ. ৬টি", "ঘ. ৮টি"],
+                answer: "খ. ৭টি"
+            },
+            {
+                question: "১৫. সংবিধানের কোন অনুচ্ছেদ অনুযায়ী, বাংলাদেশের নাগরিকগণ 'বাংলাদেশী' বলিয়া পরিচিত হবেন? (২৬তম বিসিএস)",
+                options: ["ক. ৬(১)", "খ. ৬(২)", "গ. ৮", "ঘ. ৯"],
+                answer: "খ. ৬(২)"
+            },
+            {
+                question: "১৬. বাংলাদেশের সংবিধানে ভাষা বিষয়ক অনুচ্ছেদটি নিম্নরূপ- (বেসরকারি বিমান চলাচলের সহকারী নিরাপত্তা কর্মকর্তা: ২১)",
+                options: ["ক. গণপ্রজাতন্ত্রী বাংলাদেশের রাষ্ট্রভাষা বাংলা", "খ. প্রজাতন্ত্রের রাষ্ট্রভাষা বাংলা", "গ. বাংলাদেশের রাষ্ট্রভাষা বাংলা", "ঘ. সরকারের রাষ্ট্রভাষা বাংলা"],
+                answer: "খ. প্রজাতন্ত্রের রাষ্ট্রভাষা বাংলা"
+            },
+            {
+                question: "১৭. প্রজাতন্ত্রের সকল ক্ষমতার মালিক জনগণ'- এ ঘোষণাটি বাংলাদেশ সংবিধানের কোন অনুচ্ছেদে উল্লিখিত হয়েছে? (পোস্টমাস্টার জেনারেলের পোস্টম্যান: ২২/ দুদক এর কোর্ট পরিদর্শক: ২২/জীবন বীমা কর্পোরেশনের উচ্চমান সহকারী: ২১/ কুবি: ১৫-১৬/)",
+                options: ["ক. ৫(২)", "খ. ৭(১)", "গ. ১৫(৩)", "ঘ. ২৯(১)"],
+                answer: "খ. ৭(১)"
+            },
+            {
+                question: "১৮. 'All powers in the Republic belong to the people.'- It is written in the part...... of the Constitution of Bangladesh. (সমন্বিত ৭ ব্যাংকের সিনিয়র অফিসার: ২১])",
+                options: ["ক. Part 1", "খ. Part 3", "গ. Part 4", "ঘ. Part 5"],
+                answer: "ক. Part 1"
+            },
+            {
+                question: "১৯. কোন অনুচ্ছেদ বলে বাংলাদেশের সংবিধানের মৌলিক বিধানাবলী পরিবর্তনযোগ্য নয়? (৪১তম বিসিএস)",
+                options: ["ক. অনুচ্ছেদ ৭", "খ. অনুচ্ছেদ ৭ (খ)", "গ. অনুচ্ছেদ ৭(ক)", "ঘ. অনুচ্ছেদ ৮"],
+                answer: "খ. অনুচ্ছেদ ৭ (খ)"
+            },
+            {
+                question: "২০. বাংলাদেশের সংবিধানের কোন অনুচ্ছেদে জাতীয় সংগীত 'আমার সোনার বাংলা' এর উল্লেখ করা হয়েছে? (পিএসসি'র সহকারী কাস্টোডিয়ান: ২৩])",
+                options: ["ক. ৩ নং", "খ. ৪ নং", "গ. ৫ নং", "ঘ. ৬ নং"],
+                answer: "খ. ৪ নং"
             }
         ];
         
