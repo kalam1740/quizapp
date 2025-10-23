@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>পরীক্ষা-২৩</title>
+    <title>পরীক্ষা-২৪</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -77,15 +77,10 @@
 
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden">
-             <!-- TIMER COUNTDOWN IS NOW VISIBLE AND CENTERED -->
-            <div class="w-full flex justify-center mb-6">
-                <div class="w-20 h-10 flex items-center justify-center rounded-full bg-red-600 shadow-xl border-2 border-red-800 transition duration-500">
-                    <span id="timer-countdown" class="text-2xl font-extrabold text-white">10</span>
-                </div>
-            </div>
+             <!-- TIMER COUNTDOWN ELEMENT REMOVED -->
             
             <div class="flex justify-between items-center mb-6 text-gray-700 font-semibold text-lg sm:text-xl">
-                <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/২০</span>
+                <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/১৩</span>
                 <span id="score-display" class="text-lg sm:text-xl">স্কোর: ০</span>
             </div>
            
@@ -114,7 +109,7 @@
                     ভালো লাগলে আমার আইডি ফলো করে রাখুন।
                 </p>
                 <a href="https://www.facebook.com/share/16WqmPLahJ/" target="_blank" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105 shadow-md">
-                    আমার আইডি লিংক
+                    আমার আইডি ফলো করুন
                 </a>
             </div>
             
@@ -194,122 +189,86 @@
         const modalMessage = document.getElementById('modal-message');
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const reviewContainer = document.getElementById('review-container');
-        const timerCountdown = document.getElementById('timer-countdown'); // Re-added UI element
-
+        // Removed: const timerCountdown = document.getElementById('timer-countdown');
 
         // Quiz state variables
         let currentQuestionIndex = 0;
         let score = 0;
         let meritListData = [];
         let userAnswers = []; // To store user selections for review
-        let quizTimer;
-        const TIME_LIMIT = 10; // Time limit in seconds (Updated to 10)
+        // Removed: let quizTimer;
+        // Removed: const TIME_LIMIT = 10;
         
         // --- নতুন প্রশ্ন সেট হলে এটি পরিবর্তন করুন ---
-        const quizId = 'quiz-set-30'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
+        const quizId = 'quiz-set-32'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
         // --- ---
 
         // Quiz questions
         const questions = [
             {
-                question: "১. বাংলাদেশ সংবিধান সর্বপ্রথম কোন তারিখে গণপরিষদে উত্থাপিত হয়? (৪২তম /১৪তম বিসিএস)",
-                options: ["ক. ১২ অক্টোবর, ১৯৭২ সালে", "খ. ১৬ ডিসেম্বর, ১৯৭২ সালে", "গ. ২৬ মার্চ, ১৯৭৩ সালে", "ঘ. ১৬ ডিসেম্বর, ১৯৭৩ সালে"],
-                answer: "ক. ১২ অক্টোবর, ১৯৭২ সালে"
+                question: "১. শ্রীচৈতন্যদেবের জীবনভিত্তিক প্রথম কাহিনী কাব্য কে রচনা করেন?",
+                options: ["ক. বৃন্দাবনদাস", "খ. লোচনদাস", "গ. জয়ানন্দ", "ঘ. পরাগলখাঁ"],
+                answer: "ক. বৃন্দাবনদাস"
             },
             {
-                question: "২. বাংলাদেশের সংবিধান কোন তারিখে গণপরিষদে গৃহীত হয়? (বাংলাদেশ টেলিভিশনের উপ-সহকারী প্রকৌশলী: ২৩/ খাদ্য অধিদপ্তরের উপ-সহকারী প্রকৌশলী: ২২/ এনএসআই এর ওয়াচার কনস্টেবল: ২১।)",
-                options: ["ক. ২ অক্টোবর, ১৯৭১", "খ. ১৬ ডিসেম্বর, ১৯৭২", "গ. ৪ নভেম্বর, ১৯৭২", "ঘ. ৪ জানুয়ারি, ১৯৭৩"],
-                answer: "গ. ৪ নভেম্বর, ১৯৭২"
+                question: "২. পাচঁালিকার হিসেবে সর্বাধিক খ্যাতি কার ছিল? [৪১তম বিসিএস ২০২১]",
+                options: ["ক. দাশরথি রায়", "খ. রামনিধি গুপ্ত", "গ. ফকির গরীবুল্লাহ", "ঘ. রামরাম বসু"],
+                answer: "ক. দাশরথি রায়"
             },
             {
-                question: "৩. গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধান দিবস কত তারিখে? (সিনিয়র স্টাফ নার্স: ২৩/ সিনিয়র স্টাফ নার্স: ২৩])",
-                options: ["ক. ১৬ ডিসেম্বর", "খ. ৭ মার্চ", "গ. ২৩ অক্টোবর", "ঘ. ৪ নভেম্বর"],
-                answer: "ঘ. ৪ নভেম্বর"
+                question: "৩. জীবনী সাহিত্যের ধারা গড়ে ওঠে কাকে কেন্দ্র করে? (৪১তম বিসিএস ২০২১)",
+                options: ["ক. শ্রীচৈতন্যদেব", "খ. কাহ্নপা", "গ. বিদ্যাপতি", "ঘ. রামকৃষ্ণ পরমহংসদেব"],
+                answer: "ক. শ্রীচৈতন্যদেব"
             },
             {
-                question: "৪. বাংলাদেশের সংবিধান গৃহীত হওয়ার সময় রাষ্ট্রপতি কে ছিলেন? (জাহাঙ্গীরনগর বিশ্ববিদ্যালয়: ১৩-১৪/ জগন্নাথ বিশ্ববিদ্যালয়: ০৫-০৬])",
-                options: ["ক. মোহাম্মদ উল্লাহ", "খ. শেখ মুজিবুর রহমান", "গ. বিচারপতি আবু সাঈদ চৌধুরী", "ঘ. বিচারপতি আহসান উদ্দীন চৌধুরী"],
-                answer: "গ. বিচারপতি আবু সাঈদ চৌধুরী"
+                question: "৪. মহাকবি আলাওল রচিত কাব্য [৪২তম বিসিএস (বিশেষ) ২০২১]",
+                options: ["ক. চন্দ্রাবতী", "খ. পদ্মাবতী", "গ. মধুমালতী", "ঘ. লাইলী মজনু"],
+                answer: "খ. পদ্মাবতী"
             },
             {
-                question: "৫. গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধান প্রবর্তিত হয়- (৪০তম বিসিএস/২০তম বিসিএস)",
-                options: ["ক. ২৫ মার্চ, ১৯৭১", "খ. ২৫ মার্চ, ১৯৭২", "গ. ১৬ ডিসেম্বর, ১৯৭১", "ঘ. ১৬ ডিসেম্বর, ১৯৭২"],
-                answer: "ঘ. ১৬ ডিসেম্বর, ১৯৭২"
+                question: "৫. উল্লিখিত কোন রচনাটি পুঁথি সাহিত্যের অন্তর্গত নয়? (৪০তম বিসিএস)",
+                options: ["ক. ময়মনসিংহ গীতিকা", "খ. ইউসুফ জুলেখা", "গ. পদ্মাবতী", "ঘ. লাইলী মজনু"],
+                answer: "ক. ময়মনসিংহ গীতিকা"
             },
             {
-                question: "৬. বাংলাদেশের সংবিধান কোন সনে প্রণীত হয়? (রাবি: ১৯-২০)",
-                options: ["ক. ১৯৭২ সালে", "খ. ১৯৭৫ সালে", "গ. ১৯৮০ সালে", "ঘ. ১৯৫২ সালে"],
-                answer: "ক. ১৯৭২ সালে"
+                question: "৬. জীবনীকাব্য রচনার জন্য বিখ্যাত (৪০তম বিসিএস)",
+                options: ["ক. ফকির গরীবুল্লাহ", "খ. নরহরি চক্রবর্তী", "গ. বিপ্রদাস পিপিলাই", "ঘ. বৃন্দাবন দাস"],
+                answer: "ঘ. বৃন্দাবন দাস"
             },
             {
-                question: "৭. ১৯৭২ সালের বাংলাদেশের সংবিধানের রাষ্ট্রীয় মূলনীতি- (যুব উন্নয়ন অধিদপ্তরের যুব উন্নয়ন কর্মকর্তা: ২২/ দুদক এর কোর্ট পরিদর্শক: ২২])",
-                options: ["ক. গণতন্ত্র, সমাজতন্ত্র, জাতীয়তাবাদ, ধর্ম নিরপেক্ষতা", "খ. ধর্ম নিরপেক্ষতা, সমাজতন্ত্র, গণতন্ত্র, জাতীয়তাবাদ", "গ. জাতীয়তাবাদ, সমাজতন্ত্র, গণতন্ত্র, ধর্ম নিরপেক্ষতা", "ঘ. জাতীয়তাবাদ, ধর্ম নিরপেক্ষতা, সমাজতন্ত্র, গণতন্ত্র"],
-                answer: "গ. জাতীয়তাবাদ, সমাজতন্ত্র, গণতন্ত্র, ধর্ম নিরপেক্ষতা"
+                question: "৭. বৈষ্ণব পদাবলির সঙ্গে কোন ভাষা সম্পর্কিত? [৪০তম বিসিএস]",
+                options: ["ক. সন্ধ্যাভাষা", "খ. অধিভাষা", "গ. ব্রজবুলি", "ঘ. সংস্কৃত ভাষা"],
+                answer: "গ. ব্রজবুলি"
             },
             {
-                question: "৮. ১৯৭২ সালের বাংলাদেশ সংবিধানের মূলনীতিগুলোর একটি হলো- (চট্টগ্রাম বিশ্ববিদ্যালয়: ১৫-১৬/)",
-                options: ["ক. ধনতন্ত্র", "খ. একনায়কতন্ত্র", "গ. গণতন্ত্র", "ঘ. রাজতন্ত্র"],
-                answer: "গ. গণতন্ত্র"
+                question: "৮. গঠনরীতিতে 'শ্রীকৃষ্ণকীর্তন' কাব্য মূলত- ৩৮তম বিসিএস)",
+                options: ["ক. পদাবলি", "খ. ধামালি", "গ. প্রেমগীতি", "ঘ. নাটগীতি (নাট্যগীতি)"],
+                answer: "ঘ. নাটগীতি (নাট্যগীতি)"
             },
             {
-                question: "৯. কোনটি ১৯৭২ সালের 'বাংলাদেশ সংবিধান' এর মূলনীতি ছিল না? (রাজশাহী বিশ্ববিদ্যালয়: ১৭-১৮)",
-                options: ["ক. সামাজিক ন্যায়বিচার", "খ. গণতন্ত্র", "গ. ধর্ম নিরপেক্ষতা", "ঘ. জাতীয়তাবাদ"],
-                answer: "ক. সামাজিক ন্যায়বিচার"
+                question: "৯. দৌলত উজির বাহরাম খান কোন অঞ্চলের অধিবাসী ছিলেন? [৩৮তম বিসিএস)",
+                options: ["ক. ফরিদপুর", "খ. সিলেট", "গ. কৃষ্ণনগর", "ঘ. চট্টগ্রাম"],
+                answer: "ঘ. চট্টগ্রাম"
             },
             {
-                question: "১০. বাংলাদেশের হস্তলিখিত সংবিধানে প্রথম স্বাক্ষর করেন কে? (এনএসআই এর ফিল্ড অফিসার: ২৩/)",
-                options: ["ক. ড. কামাল হোসেন", "খ. বেগম রাজিয়া বানু", "গ. শেখ মুজিবুর রহমান", "ঘ. আবু সায়ীদ চৌধুরী"],
-                answer: "গ. শেখ মুজিবুর রহমান"
+                question: "১০. 'চন্দ্রাবতী' কী? ৩৮তম বিসিএস",
+                options: ["ক. নাটক", "খ. কাব্য", "গ. পদাবলী", "ঘ. পালাগান"],
+                answer: "ঘ. পালাগান"
             },
             {
-                question: "১১. বাংলাদশে সংবিধান দুষ্পরিবর্তনীয় কেন? (সংস্থাপন মন্ত্রণালয়ের প্রশাসনিক কর্মকর্তা: ০৭)",
-                options: ["ক. পরিবর্তন সহজ নয় বলে", "খ. নাতিদীর্ঘ বলে", "গ. লিখিত আকারে লিপিবদ্ধ বলে", "ঘ. পরিবর্তনে দক্ষতার অভাব"],
-                answer: "ক. পরিবর্তন সহজ নয় বলে"
+                question: "১১. 'বিদ্যাপতি' কোন রাজসভার কবি ছিলেন? (৩৮তম বিসিএস)",
+                options: ["ক. রোসাঙ্গ", "খ. কৃষ্ণনগর", "গ. বিক্রমপুর", "ঘ. মিথিলা"],
+                answer: "ঘ. মিথিলা"
             },
             {
-                question: "১২. বাংলাদেশের সংবিধানে কয়টি ভাগ আছে? (ঢাবি: ১৭-১৮/)",
-                options: ["ক. ৯", "খ. ১০", "গ. ১১", "ঘ. ১২"],
-                answer: "গ. ১১"
+                question: "১২. শৃঙ্গার রসকে বৈষ্ণব পদাবলিতে কী রস বলে? [৩৭তম বিসিএস]",
+                options: ["ক. ভারস", "খ. মধুর রস", "গ. প্রেমরস", "ঘ. লীলারস"],
+                answer: "খ. মধুর রস"
             },
             {
-                question: "১৩. গণপ্রজাতন্ত্রী বাংলাদেশের সংবিধানে কতটি অনুচ্ছেদ আছে? (সুপ্রীম কোর্টের প্রটোকল অফিসার: ২৩/ দুদক এর কোর্ট পরিদর্শক: ২২)",
-                options: ["ক. ১৫৬", "খ. ১৫৫", "গ. ১৫৩", "ঘ. ১৫২"],
-                answer: "গ. ১৫৩"
-            },
-            {
-                question: "১৪. গণপ্রজাতন্ত্রী বাংলাদেশ সংবিধানে কতটি তফসিল রয়েছে? (৩৯তম বিসিএস/ বিআরটিএ'র মোটরযান পরিদর্শক: ১৭/)",
-                options: ["ক. ৫টি", "খ. ৭টি", "গ. ৬টি", "ঘ. ৮টি"],
-                answer: "খ. ৭টি"
-            },
-            {
-                question: "১৫. সংবিধানের কোন অনুচ্ছেদ অনুযায়ী, বাংলাদেশের নাগরিকগণ 'বাংলাদেশী' বলিয়া পরিচিত হবেন? (২৬তম বিসিএস)",
-                options: ["ক. ৬(১)", "খ. ৬(২)", "গ. ৮", "ঘ. ৯"],
-                answer: "খ. ৬(২)"
-            },
-            {
-                question: "১৬. বাংলাদেশের সংবিধানে ভাষা বিষয়ক অনুচ্ছেদটি নিম্নরূপ- (বেসরকারি বিমান চলাচলের সহকারী নিরাপত্তা কর্মকর্তা: ২১)",
-                options: ["ক. গণপ্রজাতন্ত্রী বাংলাদেশের রাষ্ট্রভাষা বাংলা", "খ. প্রজাতন্ত্রের রাষ্ট্রভাষা বাংলা", "গ. বাংলাদেশের রাষ্ট্রভাষা বাংলা", "ঘ. সরকারের রাষ্ট্রভাষা বাংলা"],
-                answer: "খ. প্রজাতন্ত্রের রাষ্ট্রভাষা বাংলা"
-            },
-            {
-                question: "১৭. প্রজাতন্ত্রের সকল ক্ষমতার মালিক জনগণ'- এ ঘোষণাটি বাংলাদেশ সংবিধানের কোন অনুচ্ছেদে উল্লিখিত হয়েছে? (পোস্টমাস্টার জেনারেলের পোস্টম্যান: ২২/ দুদক এর কোর্ট পরিদর্শক: ২২/জীবন বীমা কর্পোরেশনের উচ্চমান সহকারী: ২১/ কুবি: ১৫-১৬/)",
-                options: ["ক. ৫(২)", "খ. ৭(১)", "গ. ১৫(৩)", "ঘ. ২৯(১)"],
-                answer: "খ. ৭(১)"
-            },
-            {
-                question: "১৮. 'All powers in the Republic belong to the people.'- It is written in the part...... of the Constitution of Bangladesh. (সমন্বিত ৭ ব্যাংকের সিনিয়র অফিসার: ২১])",
-                options: ["ক. Part 1", "খ. Part 3", "গ. Part 4", "ঘ. Part 5"],
-                answer: "ক. Part 1"
-            },
-            {
-                question: "১৯. কোন অনুচ্ছেদ বলে বাংলাদেশের সংবিধানের মৌলিক বিধানাবলী পরিবর্তনযোগ্য নয়? (৪১তম বিসিএস)",
-                options: ["ক. অনুচ্ছেদ ৭", "খ. অনুচ্ছেদ ৭ (খ)", "গ. অনুচ্ছেদ ৭(ক)", "ঘ. অনুচ্ছেদ ৮"],
-                answer: "খ. অনুচ্ছেদ ৭ (খ)"
-            },
-            {
-                question: "২০. বাংলাদেশের সংবিধানের কোন অনুচ্ছেদে জাতীয় সংগীত 'আমার সোনার বাংলা' এর উল্লেখ করা হয়েছে? (পিএসসি'র সহকারী কাস্টোডিয়ান: ২৩])",
-                options: ["ক. ৩ নং", "খ. ৪ নং", "গ. ৫ নং", "ঘ. ৬ নং"],
-                answer: "খ. ৪ নং"
+                question: "১৩. 'গোরক্ষ বিজয়' কাব্য কোন ধর্মমতের কাহিনি অবলম্বনে লেখা? (৩৭তম বিসিএস)",
+                options: ["ক. শৈবধর্ম", "খ. বৌদ্ধ সহজযান", "গ. নাথধম", "ঘ. কোনোটি নয়"],
+                answer: "গ. নাথধম"
             }
         ];
         
@@ -324,41 +283,9 @@
             showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
         });
 
-        // --- Timer Functions ---
-        const startTimer = () => {
-            let timeLeft = TIME_LIMIT;
-            timerCountdown.textContent = timeLeft;
-            timerCountdown.parentNode.classList.remove('bg-yellow-600', 'bg-green-600');
-            timerCountdown.parentNode.classList.add('bg-red-600');
-            
-            if (quizTimer) clearInterval(quizTimer);
-
-            quizTimer = setInterval(() => {
-                timeLeft--;
-                timerCountdown.textContent = timeLeft;
-                
-                if (timeLeft <= 3 && timeLeft > 0) { // Changed threshold for yellow warning
-                     timerCountdown.parentNode.classList.remove('bg-red-600');
-                     timerCountdown.parentNode.classList.add('bg-yellow-600');
-                }
-                if (timeLeft === 0) {
-                     timerCountdown.parentNode.classList.remove('bg-red-600');
-                     timerCountdown.parentNode.classList.add('bg-green-600');
-                }
-
-                if (timeLeft <= 0) {
-                    clearInterval(quizTimer);
-                    handleAnswer(null); // Time's up
-                }
-            }, 1000);
-        };
-
-        const clearTimer = () => {
-            if (quizTimer) {
-                clearInterval(quizTimer);
-                quizTimer = null;
-            }
-        };
+        // --- Timer Functions (All removed) ---
+        // Removed: const startTimer = () => { ... }
+        // Removed: const clearTimer = () => { ... }
 
         // --- Merit List ---
         const setupMeritListListener = () => {
@@ -455,7 +382,7 @@
         };
 
         const renderQuestion = () => {
-            clearTimer();
+            // clearTimer() removed
             if (currentQuestionIndex >= questions.length) {
                 showResults();
                 return;
@@ -476,11 +403,11 @@
                 optionsContainer.appendChild(button);
             });
 
-            startTimer();
+            // startTimer() removed
         };
 
         const handleAnswer = (selectedOption) => {
-            clearTimer();
+            // clearTimer() removed
             const currentQuestion = questions[currentQuestionIndex];
             const optionButtons = optionsContainer.querySelectorAll('button');
             const isCorrect = selectedOption === currentQuestion.answer;
@@ -489,7 +416,7 @@
             userAnswers.push({
                 question: currentQuestion.question,
                 correctAnswer: currentQuestion.answer,
-                userSelected: selectedOption === null ? 'সময় শেষ' : selectedOption,
+                userSelected: selectedOption, // Selected option is always an answer string now
                 isCorrect: isCorrect
             });
 
@@ -509,8 +436,8 @@
                 }
             });
             
-            // If time is up, show correct answer but don't count score
-            if (selectedOption !== null && isCorrect) {
+            // Only count score if an option was selected and it was correct
+            if (isCorrect) {
                 score++;
             }
 
@@ -528,7 +455,8 @@
                 const textColor = isCorrect ? 'text-green-700' : 'text-red-700';
                 const bgColor = isCorrect ? 'bg-green-50' : 'bg-red-50';
                 const icon = isCorrect ? '✅' : '❌';
-                const selectedText = answer.userSelected === null ? 'সময় শেষ, উত্তর দেননি।' : answer.userSelected;
+                // Simplified selectedText since null is no longer possible
+                const selectedText = answer.userSelected; 
 
                 reviewItem.className = `p-4 rounded-lg border ${bgColor}`;
                 reviewItem.innerHTML = `
@@ -542,7 +470,7 @@
 
 
         const showResults = async () => {
-            clearTimer(); // Just in case
+            // clearTimer() removed
             showScreen('results');
             finalScoreText.textContent = `আপনার স্কোর: ${score}/${questions.length}`;
             renderQuizReview(); // Show the review section
