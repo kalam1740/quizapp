@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>পরীক্ষা-৩৩ | আবুল কালাম মিয়া </title>
+    <title>পরীক্ষা-৩৪ | আবুল কালাম মিয়া কুইজ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jsPDF and AutoTable for PDF generation --><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -35,14 +35,14 @@
             font-weight: 700;
         }
 
-        /* NEW: Colorful text for "Abul Kalam Mia" */
+        /* Colorful text for "Abul Kalam Mia" - adjusted for better contrast on image */
         .quiz-name-text {
             text-transparent;
             background-clip: text;
             background-image: linear-gradient(to right, #ef4444, #fcd34d, #4ade80); /* Red, Yellow, Green */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 900; /* Bolder */
+            font-weight: 900; 
         }
 
 
@@ -101,7 +101,7 @@
             box-shadow: none;
         }
         
-        /* Ensuring all primary text in transparent areas is white/shadowed */
+        /* Ensuring all primary text is white/shadowed */
         .main-content h1, .main-content h2, .main-content p {
             color: white !important; /* Override dark text in main content */
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
@@ -114,8 +114,8 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
         }
         
-        /* Merit list/Review header/text adjustments for translucent background */
-        #results-screen .bg-black-60 * {
+        /* Merit list/Review text adjustments for white background */
+        #results-screen .translucent-bg * {
             color: white !important;
         }
         
@@ -127,11 +127,13 @@
         .merit-list-item {
              background-color: transparent !important;
              color: white !important;
+             border-color: rgba(255, 255, 255, 0.2) !important;
         }
         
-        /* Merit list page titles should still be white */
+        /* Merit list page titles */
         #merit-list-page h3 {
              color: white !important;
+             text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
         }
 
         input[type="radio"] {
@@ -146,6 +148,7 @@
     <div id="loading" class="absolute inset-0 bg-white/70 flex items-center justify-center z-50">
         <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <!-- FIXED: Loading message changed back to dynamic image text -->
             <p id="loading-message" class="text-gray-700 text-lg font-semibold">কুইজের জন্য ছবি তৈরি হচ্ছে... (একটু সময় লাগতে পারে)</p>
         </div>
     </div>
@@ -164,7 +167,7 @@
         
         <!-- Start Screen --><div id="start-screen" class="hidden">
             <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 animate-bounce text-center quiz-overlay-text">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
-            <p class="text-xl font-extrabold mb-10 text-center shadow-md quiz-overlay-text">প্রতিদিন পরীক্ষা নেওয়া হয় ,আমার আইডিতে ।আপনার প্রস্তুতি যাচাই করতে প্রতিদিন পরীক্ষা দিন। আইডি ফলো করে রাখবেন অবশ্যই ।</p>
+            <p class="text-xl font-extrabold text-pink-300 mb-10 text-center shadow-md quiz-overlay-text">প্রতিদিন পরীক্ষা নেওয়া হয় ,আমার আইডিতে ।আপনার প্রস্তুতি যাচাই করতে প্রতিদিন পরীক্ষা দিন। আইডি ফলো করে রাখবেন অবশ্যই ।</p>
             <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-gray-800">
             <div class="flex flex-col sm:flex-row gap-6 justify-center">
                 <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
@@ -173,7 +176,7 @@
         </div>
 
         <!-- Quiz Screen (All questions on one page) --><div id="quiz-screen" class="hidden">
-            <h2 class="text-3xl font-bold mb-6 text-center quiz-overlay-text">প্রশ্নাবলী</h2>
+            <h2 class="text-3xl font-bold mb-6 text-center quiz-overlay-text">কুইজ প্রশ্নাবলী</h2>
             
             <!-- The form container for all questions --><form id="questions-form" class="space-y-6">
                 <!-- Questions will be dynamically inserted here by JavaScript --><p class="text-center text-white">প্রশ্ন লোড হচ্ছে...</p>
@@ -188,7 +191,7 @@
             <h2 class="text-4xl sm:text-5xl font-extrabold text-green-300 mb-4 quiz-overlay-text">অভিনন্দন!</h2>
             <p id="final-score-text" class="text-xl sm:text-2xl mb-6 font-bold quiz-overlay-text"></p>
             
-            <!-- Answer Review Section: Updated to translucent background -->
+            <!-- Answer Review Section: Dark Translucent background -->
             <div class="text-left mb-8 translucent-bg p-4 rounded-lg shadow-xl max-h-96 overflow-y-auto">
                 <h3 class="text-2xl font-bold text-white mb-4 border-b pb-2 border-white/40">উত্তর পর্যালোচনা</h3>
                 <div id="review-container" class="space-y-4">
@@ -210,7 +213,7 @@
             </div>
         </div>
 
-        <!-- Merit List Page: Updated to translucent background --><div id="merit-list-page" class="hidden">
+        <!-- Merit List Page: Dark Translucent background --><div id="merit-list-page" class="hidden">
             <h3 class="text-4xl sm:text-5xl font-extrabold text-white mb-8 text-center quiz-overlay-text">মেধা তালিকা</h3>
             <div class="translucent-bg rounded-lg p-6 shadow-xl mb-8">
                 <!-- Merit List Header --><div class="merit-list-header p-3 bg-white/30 rounded-t-lg text-gray-800 border-b border-white/40">
@@ -231,7 +234,7 @@
     <!-- Updated Firebase v11 Modular API Imports and Logic --><script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, onSnapshot, addDoc, where, getDocs, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, onSnapshot, addDoc, where, getDocs, deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // setLogLevel import removed as it's not strictly necessary for functionality
 
         // Global listeners to prevent copying and right-click
@@ -252,7 +255,7 @@
         const loadingMessage = document.getElementById('loading-message');
         
         // --- Image Generation Prompt (User Specified) ---
-        // UPDATED PROMPT: Waterfalls and Springs
+        // RESTORED PROMPT: Waterfalls and Springs
         const USER_IMAGE_PROMPT = "A vibrant, lush landscape painting of a waterfall cascading down a rocky cliff in a tropical forest, Bangladesh.";
 
         if (firebaseConfig) {
@@ -276,7 +279,7 @@
                     setupMeritListListener();
                     
                     // CRITICAL CHANGE: Initialize UI and generate image immediately after auth
-                    await initializeAppUI();
+                    initializeAppUI();
 
                 } catch (error) {
                     console.error("Firebase Auth Error:", error);
@@ -318,11 +321,9 @@
         let userAnswers = []; // To store user selections for review
         
         // --- Quiz ID (Should be unique for each new quiz set) ---
-        // UPDATED QUIZ ID
         const quizId = 'quiz-set-41'; 
 
         // Quiz questions
-        // UPDATED QUESTIONS (Springs and Waterfalls)
         const questions = [
             {
                 question: "১. চট্টগ্রামের সীতাকুণ্ডের পাহাড়িয়া অঞ্চলে আছে- (প্রাথমিক বিদ্যালয় সহকারী শিক্ষক: ১৩/)",
@@ -445,7 +446,7 @@
                 const rankClass = getRankDesign(currentRank - 1); 
 
                 const li = document.createElement('li');
-                // Removed redundant classes, only keeping the dynamic rank class
+                // Updated class for clean background
                 li.className = `merit-list-item p-4 text-lg border-b border-white/20 ${rankClass} transition duration-150`;
                 
                 li.innerHTML = `
@@ -463,7 +464,7 @@
             
             questions.forEach((q, index) => {
                 const questionElement = document.createElement('div');
-                // Using new transparent styling for dynamic background
+                // Updated class for clean contrast
                 questionElement.className = "question-block p-4 transition duration-150 border-b border-white/50";
                 questionElement.setAttribute('data-question-index', index);
                 
@@ -490,7 +491,7 @@
             });
 
              // Apply fixed height and scrolling after rendering
-            questionsForm.style.maxHeight = '90vh'; /* UPDATED: Changed from 85vh to 90vh */
+            questionsForm.style.maxHeight = '90vh'; 
             questionsForm.style.overflowY = 'auto';
             questionsForm.style.padding = '1rem';
             questionsForm.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
@@ -498,19 +499,25 @@
         };
 
 
-        // --- Dynamic Image Generation function ---
+        // --- Dynamic Image Generation without Persistence (Restored) ---
+        const setBackgroundImage = (base64Data) => {
+            document.body.style.backgroundImage = `url('data:image/png;base64,${base64Data}')`;
+            document.body.style.backgroundColor = '#000';
+            loadingScreen.classList.add('hidden');
+        };
+
         const generateBackgroundImage = async (prompt) => {
+            // FIX: Removed persistence logic (Firestore check/save) due to 1MB document size limit.
             loadingMessage.textContent = 'কুইজের জন্য ছবি তৈরি হচ্ছে... (একটু সময় লাগতে পারে)';
             const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-            
-            // Appending style hints to the user prompt
-            const fullPrompt = prompt + ", high contrast, cinematic light, digital blueprint"; 
+            const fullPrompt = prompt + ", high contrast, cinematic light, digital painting"; 
             const payload = { 
                 instances: [{ prompt: fullPrompt }], 
                 parameters: { "sampleCount": 1 } 
             };
-            
+
+            // Call API
             let response;
             try {
                 let attempts = 0;
@@ -518,56 +525,45 @@
 
                 while (attempts < maxAttempts) {
                     attempts++;
-                    try {
-                        response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-                        if (response.ok) {
-                            break; 
-                        } else if (response.status === 429) {
-                            if (attempts < maxAttempts) {
-                                const delay = Math.pow(2, attempts) * 1000;
-                                await new Promise(resolve => setTimeout(resolve, delay));
-                                continue;
-                            }
-                        }
-                        throw new Error(`API returned status ${response.status}`);
-                    } catch (error) {
-                         if (attempts === maxAttempts) {
-                            throw error; 
-                        }
+                    if (response.ok) break;
+                    if (response.status === 429 && attempts < maxAttempts) {
                         const delay = Math.pow(2, attempts) * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
                     }
+                    throw new Error(`API returned status ${response.status}`);
                 }
                 
                 const result = await response.json();
-                
                 const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
                 
                 if (base64Data) {
-                    document.body.style.backgroundImage = `url('data:image/png;base64,${base64Data}')`;
-                    document.body.style.backgroundColor = '#000'; // Ensure dark background for contrast
+                    setBackgroundImage(base64Data);
                 } else {
-                     throw new Error('Image generation failed or no data returned.');
+                    throw new Error('Image generation failed or no data returned.');
                 }
             } catch (error) {
                 console.error("Image generation error:", error);
-                // Fallback to a static, generic blueprint/map background if generation fails
+                // Fallback to a static, generic background if generation fails
                 document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1596495578051-667b5fc20f83?fit=crop&w=1920&h=1080&q=80')`;
                 showModal("ছবি তৈরি করা সম্ভব হয়নি। একটি সাধারণ ব্যাকগ্রাউন্ড ব্যবহার করা হচ্ছে।");
+                loadingScreen.classList.add('hidden');
             }
         };
+
+
         
         const initializeAppUI = async () => {
             // 1. Generate Image based on the quiz theme immediately on load
             await generateBackgroundImage(USER_IMAGE_PROMPT); 
             
-            // 2. Hide loading screen and show start screen
-            loadingScreen.classList.add('hidden');
+            // 2. Show start screen
             showScreen('start');
         };
 
@@ -643,7 +639,7 @@
                 reviewItem.innerHTML = `
                     <p class="font-bold text-lg mb-2 ${textColor}">${index + 1}. ${answer.question} <span class="float-right">${icon}</span></p>
                     <p class="text-sm">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
-                    <p class="text-sm">সঠিক উত্তর: <span class="text-green-300 font-semibold">${answer.correctAnswer}</span></p>
+                    <p class="text-sm">সঠিক উত্তর: <span class="text-green-300 font-semibold">✅ ${answer.correctAnswer}</span></p>
                 `;
                 reviewContainer.appendChild(reviewItem);
             });
@@ -708,8 +704,6 @@
             if (screenName !== 'loading') {
                 loadingScreen.classList.add('hidden');
             }
-
-            // We rely on the body style set by generateBackgroundImage
 
             if (screenName === 'start') {
                 startScreen.classList.remove('hidden');
@@ -793,4 +787,3 @@
     </script>
 </body>
 </html>
-
