@@ -3,23 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>পরীক্ষা-৩৪ | আবুল কালাম মিয়া কুইজ</title>
+    <title>পরীক্ষা-৩৪</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jsPDF and AutoTable for PDF generation --><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            
-            /* Fallback color for initial load or if image generation fails */
-            background-color: #16a085; 
-            
-            /* Background image properties for dynamically loaded image */
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            
-            user-select: none; /* Text copying disabled */
+            /* UPDATED: Dark Aurora Blue to Black Gradient */
+            background-color: #0c1a2e; /* Fallback: Dark Blue */
+            background-image: linear-gradient(135deg, #0c1a2e 0%, #000000 100%); /* Deep Dark Blue to Black */
+            user-select: none; 
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -28,25 +22,23 @@
             display: none;
         }
         
-        /* ADDING back Text shadow for better readability over the background image */
+        /* New Universal Text Style for Dark Background (for all screens) */
         .quiz-overlay-text {
-            color: white; 
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), -2px -2px 4px rgba(0, 0, 0, 1);
+            color: white !important; 
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), -2px -2px 4px rgba(0, 0, 0, 1); /* Strong Shadow for readability */
             font-weight: 700;
         }
-
-        /* Colorful text for "Abul Kalam Mia" - adjusted for better contrast on image */
+        
         .quiz-name-text {
-            text-transparent;
-            background-clip: text;
-            background-image: linear-gradient(to right, #ef4444, #fcd34d, #4ade80); /* Red, Yellow, Green */
+            /* Colorful gradient remains, but text is now white/shadowed over it for visibility */
+            background-image: linear-gradient(to right, #ef4444, #fcd34d, #4ade80);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 900; 
+            font-weight: 900;
         }
 
 
-        /* Custom styles for responsive merit list columns */
+        /* Custom styles for responsive merit list columns (Layout remains) */
         .merit-list-header, .merit-list-item {
             display: grid;
             grid-template-columns: 0.1fr 1.5fr 0.5fr; 
@@ -63,93 +55,125 @@
             }
         }
         
-        /* Question form (Making transparent and highly translucent) */
+        /* *** CRITICAL FIXES FOR SINGLE BACKGROUND *** */
+        
+        /* Main Content Container: Fully Transparent, no box shadow */
+        .main-content {
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* Quiz Form Box: Fully Transparent, no border, no shadow */
         #questions-form {
-            max-height: 90vh; /* INCREASED HEIGHT HERE AGAIN for more space */
+            max-height: 90vh; 
             overflow-y: auto;
-            border: none; 
-            background-color: rgba(255, 255, 255, 0.1) !important; /* Highly translucent for slight distinction */
+            border: none;
+            background-color: transparent !important;
             padding: 1rem !important;
             box-shadow: none;
             border-radius: 0.5rem;
         }
-
-        /* Question Block */
+        
+        /* Question Block: Transparent with white divider */
         .question-block {
              background-color: transparent !important; 
-             border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Lighter divider for transparent background */
+             border-bottom: 1px solid rgba(255, 255, 255, 0.4); /* White divider */
              padding: 1rem 0 !important;
              box-shadow: none;
         }
         
-        /* Option Label */
+        /* Option Label: Transparent with slight white background on hover */
         .options-group label {
-            background-color: rgba(255, 255, 255, 0.1); /* Translucent option background */
-            color: white; /* White text color */
+            background-color: rgba(255, 255, 255, 0.1); /* Very slight transparency */
+            color: white; 
             padding: 12px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         .options-group label:hover {
-             background-color: rgba(255, 255, 255, 0.3); 
+             background-color: rgba(255, 255, 255, 0.2); 
         }
 
-        /* Reverting main container back to transparent */
-        .main-content {
-            background-color: transparent;
-            box-shadow: none;
-        }
-        
-        /* Ensuring all primary text is white/shadowed */
-        .main-content h1, .main-content h2, .main-content p {
-            color: white !important; /* Override dark text in main content */
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
+        /* Ensuring all primary text elements use the overlay style */
+        .main-content h1, .main-content h2, .main-content p, .question-block p, .options-group label span {
+             color: white !important; 
         }
 
-        /* UPDATED: Special handling for merit list/review screens to make them transparent/dark */
+        /* --- FIX: RESULTS/MERIT LIST NOW FULLY TRANSPARENT --- */
         .translucent-bg {
-            background-color: rgba(0, 0, 0, 0.6) !important; /* Dark Translucent background */
-            color: white !important;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+            background-color: transparent !important; 
+            box-shadow: none !important;
+            border: none !important;
         }
         
-        /* Merit list/Review text adjustments for white background */
-        #results-screen .translucent-bg * {
-            color: white !important;
-        }
-        
-        /* Merit list header and items need specific contrast */
-        .merit-list-header {
-            background-color: rgba(255, 255, 255, 0.3) !important;
-            color: #1f2937 !important; /* Keep text dark for readability on light header */
-        }
-        .merit-list-item {
-             background-color: transparent !important;
-             color: white !important;
-             border-color: rgba(255, 255, 255, 0.2) !important;
-        }
-        
-        /* Merit list page titles */
-        #merit-list-page h3 {
-             color: white !important;
-             text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
+        /* Fixing color contrast within transparent blocks */
+        /* All text within results/merit lists now uses the white/shadow overlay style */
+        #results-screen h2, #results-screen p, 
+        #results-screen .translucent-bg *, 
+        #merit-list-page .translucent-bg * {
+            color: white !important; 
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 1), -1px -1px 3px rgba(0, 0, 0, 1);
+            background-color: transparent !important;
         }
 
-        input[type="radio"] {
-            border-color: rgba(255, 255, 255, 0.7);
-            color: #4ade80; /* Light green/blue for contrast */
-            background-color: transparent;
+        /* Merit list header needs a subtle background/color for table structure */
+        .merit-list-header {
+            background-color: rgba(255, 255, 255, 0.2) !important; /* Light transparent background */
+            color: white !important; /* Keep text white */
+            border-bottom: 2px solid rgba(255, 255, 255, 0.8) !important;
         }
+        .merit-list-header span {
+            color: white !important;
+        }
+        
+        /* Fixing internal borders in review/merit list for transparency */
+        #review-container .p-4 {
+             border: 1px solid rgba(255, 255, 255, 0.4) !important; /* Subtle white border */
+        }
+        
+        /* Fixing final score text color which was previously text-gray-700 */
+        #final-score-text {
+            color: white !important;
+        }
+
+        /* Fixing input colors (unchanged, still uses default contrast) */
+        input[type="radio"] {
+            border-color: #9ca3af;
+            color: #3b82f6; 
+            background-color: white;
+        }
+
+        /* --- NEW STYLES FOR MERIT LIST HIGHLIGHTS --- */
+        .rank-highlight-1 {
+            background-color: #ffd70040 !important; /* Gold Translucent */
+            font-weight: 800;
+            border: 2px solid #ffcc00;
+        }
+        .rank-highlight-2 {
+            background-color: #c0c0c040 !important; /* Silver Translucent */
+            font-weight: 700;
+            border: 2px solid #a9a9a9;
+        }
+        .rank-highlight-3 {
+            background-color: #cd7f3240 !important; /* Bronze Translucent */
+            font-weight: 600;
+            border: 2px solid #8b4513;
+        }
+        .rank-standard {
+            background-color: rgba(255, 255, 255, 0.1) !important; /* Standard translucent */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+<!-- Removed all image related styles from body tag --><body class="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
 
-    <div id="loading" class="absolute inset-0 bg-white/70 flex items-center justify-center z-50">
+    <div id="loading" class="absolute inset-0 bg-white/70 flex items-center justify-center z-50 hidden">
         <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <!-- FIXED: Loading message changed back to dynamic image text -->
-            <p id="loading-message" class="text-gray-700 text-lg font-semibold">কুইজের জন্য ছবি তৈরি হচ্ছে... (একটু সময় লাগতে পারে)</p>
+            <!-- Loading message reverted to simple loading -->
+            <p id="loading-message" class="text-gray-700 text-lg font-semibold">অ্যাপ্লিকেশন লোড হচ্ছে...</p>
         </div>
     </div>
 
@@ -160,17 +184,17 @@
         </div>
     </div>
 
-    <!-- Main Content Container: Now fully transparent --><div class="main-content w-full max-w-6xl rounded-xl p-6 sm:p-10 md:p-12 shadow-none">
+    <!-- Main Content Container: Now transparent background --><div class="main-content w-full max-w-6xl rounded-xl p-6 sm:p-10 md:p-12 shadow-none">
         <div class="text-center font-bold text-3xl sm:text-4xl mb-8">
             <span class="quiz-name-text">আবুল কালাম মিয়া</span>
         </div>
         
-        <!-- Start Screen --><div id="start-screen" class="hidden">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 animate-bounce text-center quiz-overlay-text">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
+        <!-- Start Screen --><div id="start-screen">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-300 mb-6 animate-bounce text-center quiz-overlay-text">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
             <p class="text-xl font-extrabold text-pink-300 mb-10 text-center shadow-md quiz-overlay-text">প্রতিদিন পরীক্ষা নেওয়া হয় ,আমার আইডিতে ।আপনার প্রস্তুতি যাচাই করতে প্রতিদিন পরীক্ষা দিন। আইডি ফলো করে রাখবেন অবশ্যই ।</p>
-            <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-gray-800">
+            <!-- Input is purposefully dark on light background --><input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-gray-800">
             <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
+                <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-305 hover:scale-105">কুইজ শুরু করুন</button>
                 <button id="view-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
             </div>
         </div>
@@ -179,7 +203,7 @@
             <h2 class="text-3xl font-bold mb-6 text-center quiz-overlay-text">কুইজ প্রশ্নাবলী</h2>
             
             <!-- The form container for all questions --><form id="questions-form" class="space-y-6">
-                <!-- Questions will be dynamically inserted here by JavaScript --><p class="text-center text-white">প্রশ্ন লোড হচ্ছে...</p>
+                <!-- Questions will be dynamically inserted here by JavaScript --><p class="text-center quiz-overlay-text">প্রশ্ন লোড হচ্ছে...</p>
             </form>
 
             <div class="mt-8 text-center">
@@ -188,18 +212,19 @@
         </div>
 
         <!-- Results Screen --><div id="results-screen" class="hidden text-center">
-            <h2 class="text-4xl sm:text-5xl font-extrabold text-green-300 mb-4 quiz-overlay-text">অভিনন্দন!</h2>
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-4 quiz-overlay-text">অভিনন্দন!</h2>
             <p id="final-score-text" class="text-xl sm:text-2xl mb-6 font-bold quiz-overlay-text"></p>
             
-            <!-- Answer Review Section: Dark Translucent background -->
-            <div class="text-left mb-8 translucent-bg p-4 rounded-lg shadow-xl max-h-96 overflow-y-auto">
-                <h3 class="text-2xl font-bold text-white mb-4 border-b pb-2 border-white/40">উত্তর পর্যালোচনা</h3>
+            <!-- Answer Review Section: Now FULLY TRANSPARENT for clarity -->
+            <div class="text-left mb-8 translucent-bg p-4 rounded-lg max-h-96 overflow-y-auto">
+                <h3 class="text-2xl font-bold quiz-overlay-text mb-4 border-b pb-2 border-white/50">উত্তর পর্যালোচনা</h3>
                 <div id="review-container" class="space-y-4">
-                    <!-- Review items will be dynamically inserted here --></div>
+                    <!-- Review items will be dynamically inserted here -->
+                </div>
             </div>
 
-            <!-- HIGHLIGHTED FOLLOW MESSAGE AND LINK --><div class="mb-8">
-                <p class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 shadow-lg mb-4 quiz-overlay-text">
+            <!-- HIGHLIGHTED FOLLOW MESSAGE AND LINK (Keep quiz-overlay-text for colors) --><div class="mb-8">
+                <p class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg mb-4 quiz-overlay-text">
                     ভালো লাগলে আমার আইডি ফলো করে রাখুন।
                 </p>
                 <a href="https://www.facebook.com/share/16WqmPLahJ/" target="_blank" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105 shadow-md">
@@ -213,13 +238,13 @@
             </div>
         </div>
 
-        <!-- Merit List Page: Dark Translucent background --><div id="merit-list-page" class="hidden">
-            <h3 class="text-4xl sm:text-5xl font-extrabold text-white mb-8 text-center quiz-overlay-text">মেধা তালিকা</h3>
-            <div class="translucent-bg rounded-lg p-6 shadow-xl mb-8">
-                <!-- Merit List Header --><div class="merit-list-header p-3 bg-white/30 rounded-t-lg text-gray-800 border-b border-white/40">
-                    <span>Rank</span>
-                    <span>নাম</span>
-                    <span class="text-right">স্কোর</span>
+        <!-- Merit List Page: Now FULLY TRANSPARENT for clarity --><div id="merit-list-page" class="hidden">
+            <h3 class="text-4xl sm:text-5xl font-extrabold quiz-overlay-text mb-8 text-center">মেধা তালিকা</h3>
+            <div class="translucent-bg rounded-lg p-6 mb-8">
+                <!-- Merit List Header --><div class="merit-list-header p-3 bg-white/20 rounded-t-lg border-b border-white/80">
+                    <span class="quiz-overlay-text">Rank</span>
+                    <span class="quiz-overlay-text">নাম</span>
+                    <span class="text-right quiz-overlay-text">স্কোর</span>
                 </div>
                 <!-- Merit List Items --><ul id="merit-list" class="divide-y divide-white/20">
                     <!-- Merit list items will be dynamically inserted here --></ul>
@@ -254,9 +279,7 @@
         const loadingScreen = document.getElementById('loading');
         const loadingMessage = document.getElementById('loading-message');
         
-        // --- Image Generation Prompt (User Specified) ---
-        // RESTORED PROMPT: Waterfalls and Springs
-        const USER_IMAGE_PROMPT = "A vibrant, lush landscape painting of a waterfall cascading down a rocky cliff in a tropical forest, Bangladesh.";
+        // --- NOTE: Dynamic Image Generation Code REMOVED ---
 
         if (firebaseConfig) {
             const app = initializeApp(firebaseConfig);
@@ -278,7 +301,7 @@
                     // Auth successful, now set up the listener
                     setupMeritListListener();
                     
-                    // CRITICAL CHANGE: Initialize UI and generate image immediately after auth
+                    // CRITICAL CHANGE: Initialize UI immediately after auth (no image generation wait)
                     initializeAppUI();
 
                 } catch (error) {
@@ -412,47 +435,44 @@
             });
         };
 
+        // --- UPDATED: getRankDesign now returns classes based on sequential index ---
         const getRankDesign = (index) => {
-            // Updated for transparent/dark background
-            if (index === 0) return 'bg-yellow-500/50 text-white font-extrabold shadow-lg';
-            if (index === 1) return 'bg-gray-500/50 text-white font-bold shadow-md';
-            if (index === 2) return 'bg-orange-500/50 text-white font-semibold shadow';
-            return 'bg-black/20 text-white';
+            if (index === 0) return 'rank-highlight-1';
+            if (index === 1) return 'rank-highlight-2';
+            if (index === 2) return 'rank-highlight-3';
+            return 'rank-standard';
         };
 
         const renderMeritList = () => {
             meritList.innerHTML = '';
             if (meritListData.length === 0) {
-                meritList.innerHTML = `<li class="text-center text-white italic p-4">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
+                // Ensure text is white for transparent background
+                meritList.innerHTML = `<li class="text-center text-white/70 italic p-4">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
                 return;
             }
             
-            // --- Implement Rank Sharing Logic ---
-            let currentRank = 1;
-            let currentScore = -1;
-            
+            // --- UPDATED: Use Sequential Rank (index + 1) ---
             meritListData.forEach((result, index) => {
-                // Determine rank based on previous score
-                if (result.score < currentScore) {
-                    currentRank = index + 1; // Increment rank if score is lower than previous
-                }
-                currentScore = result.score; // Update current score
+                // Sequential Rank (1, 2, 3, 4, 5...)
+                const currentRank = index + 1; 
 
+                // Determine Rank Text (1st, 2nd, 3rd, or sequential number)
                 const rankText = currentRank === 1 ? '১ম' : 
-                                 currentRank === 2 ? '২য়' : 
-                                 currentRank === 3 ? '৩য়' : 
-                                 currentRank + '.'; // Using period for other ranks
+                                 currentRank === 2 ? '২য়' : 
+                                 currentRank === 3 ? '৩য়' : 
+                                 currentRank + '.'; 
                                  
-                const rankClass = getRankDesign(currentRank - 1); 
+                const rankClass = getRankDesign(index); // Use index (0, 1, 2...) for highlighting
 
                 const li = document.createElement('li');
-                // Updated class for clean background
+                // Use the rankClass for styling/highlighting
                 li.className = `merit-list-item p-4 text-lg border-b border-white/20 ${rankClass} transition duration-150`;
                 
+                // Ensure text inside list item uses overlay text styles and Rank is dynamic
                 li.innerHTML = `
-                    <span class="text-center font-extrabold">${rankText}</span>
-                    <span class="truncate">${result.name}</span>
-                    <span class="font-bold text-right">${result.score}/${questions.length}</span>
+                    <span class="text-center font-extrabold quiz-overlay-text">${rankText}</span>
+                    <span class="truncate quiz-overlay-text">${result.name}</span>
+                    <span class="font-bold text-right quiz-overlay-text">${result.score}/${questions.length}</span>
                 `;
                 meritList.appendChild(li);
             });
@@ -465,7 +485,7 @@
             questions.forEach((q, index) => {
                 const questionElement = document.createElement('div');
                 // Updated class for clean contrast
-                questionElement.className = "question-block p-4 transition duration-150 border-b border-white/50";
+                questionElement.className = "question-block p-4 transition duration-150 border-b border-white/40"; // Keeping divider for transparent form
                 questionElement.setAttribute('data-question-index', index);
                 
                 let optionsHtml = '';
@@ -474,15 +494,15 @@
                     const inputName = `question-${index}`;
 
                     optionsHtml += `
-                        <label for="${optionId}" class="flex items-start mb-2 p-3 rounded-lg transition duration-150 bg-white/10 hover:bg-white/30 cursor-pointer border border-white/50 shadow-sm">
-                            <input type="radio" id="${optionId}" name="${inputName}" value="${option}" class="mt-1 mr-3 h-5 w-5 text-blue-300 focus:ring-blue-300 border-white/50 bg-transparent">
-                            <span class="ml-2 text-base text-white">${option}</span>
+                        <label for="${optionId}" class="flex items-start mb-2 p-3 rounded-lg transition duration-150 bg-white/10 hover:bg-white/20 cursor-pointer border border-white/40 shadow-sm">
+                            <input type="radio" id="${optionId}" name="${inputName}" value="${option}" class="mt-1 mr-3 h-5 w-5 text-blue-300 focus:ring-blue-500 border-white/40 bg-transparent">
+                            <span class="ml-2 text-base quiz-overlay-text">${option}</span>
                         </label>
                     `;
                 });
 
                 questionElement.innerHTML = `
-                    <p class="text-xl font-semibold mb-3 text-white">${q.question}</p>
+                    <p class="text-xl font-semibold mb-3 quiz-overlay-text">${q.question}</p>
                     <div class="options-group space-y-1 mt-3">
                         ${optionsHtml}
                     </div>
@@ -494,76 +514,16 @@
             questionsForm.style.maxHeight = '90vh'; 
             questionsForm.style.overflowY = 'auto';
             questionsForm.style.padding = '1rem';
-            questionsForm.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            // KEEPING TRANSPARENT STYLES HERE
+            questionsForm.style.backgroundColor = 'transparent';
             questionsForm.style.border = 'none';
-        };
-
-
-        // --- Dynamic Image Generation without Persistence (Restored) ---
-        const setBackgroundImage = (base64Data) => {
-            document.body.style.backgroundImage = `url('data:image/png;base64,${base64Data}')`;
-            document.body.style.backgroundColor = '#000';
-            loadingScreen.classList.add('hidden');
-        };
-
-        const generateBackgroundImage = async (prompt) => {
-            // FIX: Removed persistence logic (Firestore check/save) due to 1MB document size limit.
-            loadingMessage.textContent = 'কুইজের জন্য ছবি তৈরি হচ্ছে... (একটু সময় লাগতে পারে)';
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-            const fullPrompt = prompt + ", high contrast, cinematic light, digital painting"; 
-            const payload = { 
-                instances: [{ prompt: fullPrompt }], 
-                parameters: { "sampleCount": 1 } 
-            };
-
-            // Call API
-            let response;
-            try {
-                let attempts = 0;
-                const maxAttempts = 3;
-
-                while (attempts < maxAttempts) {
-                    attempts++;
-                    response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) break;
-                    if (response.status === 429 && attempts < maxAttempts) {
-                        const delay = Math.pow(2, attempts) * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        continue;
-                    }
-                    throw new Error(`API returned status ${response.status}`);
-                }
-                
-                const result = await response.json();
-                const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
-                
-                if (base64Data) {
-                    setBackgroundImage(base64Data);
-                } else {
-                    throw new Error('Image generation failed or no data returned.');
-                }
-            } catch (error) {
-                console.error("Image generation error:", error);
-                // Fallback to a static, generic background if generation fails
-                document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1596495578051-667b5fc20f83?fit=crop&w=1920&h=1080&q=80')`;
-                showModal("ছবি তৈরি করা সম্ভব হয়নি। একটি সাধারণ ব্যাকগ্রাউন্ড ব্যবহার করা হচ্ছে।");
-                loadingScreen.classList.add('hidden');
-            }
         };
 
 
         
         const initializeAppUI = async () => {
-            // 1. Generate Image based on the quiz theme immediately on load
-            await generateBackgroundImage(USER_IMAGE_PROMPT); 
-            
-            // 2. Show start screen
+            // No image generation needed, so directly hide loading and show start screen
+            loadingScreen.classList.add('hidden'); 
             showScreen('start');
         };
 
@@ -628,18 +588,21 @@
             reviewContainer.innerHTML = '';
             userAnswers.forEach((answer, index) => {
                 const isCorrect = answer.isCorrect;
-                // Updated styles for translucent background
-                const textColor = 'text-white'; 
-                const bgColorClass = isCorrect ? 'bg-green-500/30' : 'bg-red-500/30'; 
+                // Since the container is transparent, we rely on colored backgrounds for item distinction
+                const textColor = isCorrect ? 'text-green-900' : 'text-red-900'; // Darker text for better contrast on light item background
+                const bgColorClass = isCorrect ? 'bg-green-300/80' : 'bg-red-300/80'; // Translucent, slightly brighter color for contrast
                 const icon = isCorrect ? '✅' : '❌';
                 const selectedText = answer.userSelected; 
 
                 const reviewItem = document.createElement('div');
-                reviewItem.className = `p-4 rounded-lg border border-white/40 ${bgColorClass}`; // Use translucent border
+                // Set the item background and border
+                reviewItem.className = `p-4 rounded-lg border border-white/50 ${bgColorClass}`; 
+                
+                // Use dark text for clarity within the colored/light item background
                 reviewItem.innerHTML = `
                     <p class="font-bold text-lg mb-2 ${textColor}">${index + 1}. ${answer.question} <span class="float-right">${icon}</span></p>
-                    <p class="text-sm">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
-                    <p class="text-sm">সঠিক উত্তর: <span class="text-green-300 font-semibold">✅ ${answer.correctAnswer}</span></p>
+                    <p class="text-sm text-gray-900">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
+                    <p class="text-sm text-gray-900">সঠিক উত্তর: <span class="text-green-800 font-semibold">✅ ${answer.correctAnswer}</span></p>
                 `;
                 reviewContainer.appendChild(reviewItem);
             });
