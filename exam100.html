@@ -5,43 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>পরীক্ষা-৩৪</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- jsPDF and AutoTable for PDF generation --><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* UPDATED: Dark Aurora Blue to Black Gradient */
-            background-color: #0c1a2e; /* Fallback: Dark Blue */
-            background-image: linear-gradient(135deg, #0c1a2e 0%, #000000 100%); /* Deep Dark Blue to Black */
-            user-select: none; 
+            background-color: #16a085; /* Dark Green */
+            user-select: none; /* Text copying disabled */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
         }
+        /* Disabling right-click and context menu on body */
         body::-webkit-scrollbar {
             display: none;
         }
         
-        /* New Universal Text Style for Dark Background (for all screens) */
-        .quiz-overlay-text {
-            color: white !important; 
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), -2px -2px 4px rgba(0, 0, 0, 1); /* Strong Shadow for readability */
-            font-weight: 700;
-        }
-        
-        .quiz-name-text {
-            /* Colorful gradient remains, but text is now white/shadowed over it for visibility */
-            background-image: linear-gradient(to right, #ef4444, #fcd34d, #4ade80);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-        }
-
-
-        /* Custom styles for responsive merit list columns (Layout remains) */
+        /* Custom styles for responsive merit list columns */
         .merit-list-header, .merit-list-item {
             display: grid;
-            grid-template-columns: 0.1fr 1.5fr 0.5fr; 
+            grid-template-columns: 0.1fr 1.5fr 0.5fr; /* Rank | Name | Score */
             gap: 1rem;
             align-items: center;
         }
@@ -49,185 +35,146 @@
             font-weight: bold;
         }
         @media (max-width: 640px) {
-            .merit-list-header, .merit-list-item {
+             .merit-list-header, .merit-list-item {
                 grid-template-columns: 0.2fr 1.2fr 0.6fr;
                 font-size: 0.9rem;
             }
         }
-        
-        /* *** CRITICAL FIXES FOR SINGLE BACKGROUND *** */
-        
-        /* Main Content Container: Fully Transparent, no box shadow */
-        .main-content {
-            background-color: transparent !important;
-            box-shadow: none !important;
+
+        /* Hide default radio button and use custom style */
+        .custom-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            border: 2px solid #3b82f6; /* Blue border */
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            margin-right: 0.75rem;
+            top: 2px;
         }
 
-        /* Quiz Form Box: Fully Transparent, no border, no shadow */
-        #questions-form {
-            max-height: 90vh; 
-            overflow-y: auto;
-            border: none;
-            background-color: transparent !important;
-            padding: 1rem !important;
-            box-shadow: none;
-            border-radius: 0.5rem;
-        }
-        
-        /* Question Block: Transparent with white divider */
-        .question-block {
-             background-color: transparent !important; 
-             border-bottom: 1px solid rgba(255, 255, 255, 0.4); /* White divider */
-             padding: 1rem 0 !important;
-             box-shadow: none;
-        }
-        
-        /* Option Label: Transparent with slight white background on hover */
-        .options-group label {
-            background-color: rgba(255, 255, 255, 0.1); /* Very slight transparency */
-            color: white; 
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-        .options-group label:hover {
-             background-color: rgba(255, 255, 255, 0.2); 
+        .custom-radio:checked {
+            background-color: #3b82f6; /* Blue center when checked */
+            border: 2px solid #1d4ed8;
         }
 
-        /* Ensuring all primary text elements use the overlay style */
-        .main-content h1, .main-content h2, .main-content p, .question-block p, .options-group label span {
-             color: white !important; 
+        .custom-radio:checked::after {
+            content: '';
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
-        /* --- FIX: RESULTS/MERIT LIST NOW FULLY TRANSPARENT --- */
-        .translucent-bg {
-            background-color: transparent !important; 
-            box-shadow: none !important;
-            border: none !important;
-        }
-        
-        /* Fixing color contrast within transparent blocks */
-        /* All text within results/merit lists now uses the white/shadow overlay style */
-        #results-screen h2, #results-screen p, 
-        #results-screen .translucent-bg *, 
-        #merit-list-page .translucent-bg * {
-            color: white !important; 
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 1), -1px -1px 3px rgba(0, 0, 0, 1);
-            background-color: transparent !important;
+        /* Style for the option container to show the button-like behavior */
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            cursor: pointer;
+            border-radius: 0.75rem;
+            background: linear-gradient(to right, #4c7cff, #6f8cfd); /* Blue Gradient */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            font-size: 1.125rem;
         }
 
-        /* Merit list header needs a subtle background/color for table structure */
-        .merit-list-header {
-            background-color: rgba(255, 255, 255, 0.2) !important; /* Light transparent background */
-            color: white !important; /* Keep text white */
-            border-bottom: 2px solid rgba(255, 255, 255, 0.8) !important;
-        }
-        .merit-list-header span {
-            color: white !important;
-        }
-        
-        /* Fixing internal borders in review/merit list for transparency */
-        #review-container .p-4 {
-             border: 1px solid rgba(255, 255, 255, 0.4) !important; /* Subtle white border */
-        }
-        
-        /* Fixing final score text color which was previously text-gray-700 */
-        #final-score-text {
-            color: white !important;
+        .option-label:hover {
+             transform: scale(1.02);
+             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
         }
 
-        /* Fixing input colors (unchanged, still uses default contrast) */
-        input[type="radio"] {
-            border-color: #9ca3af;
-            color: #3b82f6; 
-            background-color: white;
+        /* Style for disabled/checked state */
+        .option-label.correct {
+            background: linear-gradient(to right, #10b981, #34d399); /* Green Gradient */
         }
-
-        /* --- NEW STYLES FOR MERIT LIST HIGHLIGHTS --- */
-        .rank-highlight-1 {
-            background-color: #ffd70040 !important; /* Gold Translucent */
-            font-weight: 800;
-            border: 2px solid #ffcc00;
-        }
-        .rank-highlight-2 {
-            background-color: #c0c0c040 !important; /* Silver Translucent */
-            font-weight: 700;
-            border: 2px solid #a9a9a9;
-        }
-        .rank-highlight-3 {
-            background-color: #cd7f3240 !important; /* Bronze Translucent */
-            font-weight: 600;
-            border: 2px solid #8b4513;
-        }
-        .rank-standard {
-            background-color: rgba(255, 255, 255, 0.1) !important; /* Standard translucent */
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .option-label.incorrect {
+            background: linear-gradient(to right, #ef4444, #f87171); /* Red Gradient */
         }
 
     </style>
 </head>
-<!-- Removed all image related styles from body tag --><body class="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+<body class="bg-[#16a085] min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
 
+    <!-- Loading, Modal elements remain fixed -->
     <div id="loading" class="absolute inset-0 bg-white/70 flex items-center justify-center z-50 hidden">
         <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <!-- Loading message reverted to simple loading -->
-            <p id="loading-message" class="text-gray-700 text-lg font-semibold">অ্যাপ্লিকেশন লোড হচ্ছে...</p>
+            <p class="text-gray-700 text-lg font-semibold">লোড হচ্ছে...</p>
         </div>
     </div>
 
-    <!-- Modal --><div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
             <p id="modal-message" class="text-gray-800 text-lg font-medium mb-4"></p>
             <button id="modal-close-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full focus:outline-none focus:shadow-outline transition duration-300">ঠিক আছে</button>
         </div>
     </div>
 
-    <!-- Main Content Container: Now transparent background --><div class="main-content w-full max-w-6xl rounded-xl p-6 sm:p-10 md:p-12 shadow-none">
-        <div class="text-center font-bold text-3xl sm:text-4xl mb-8">
-            <span class="quiz-name-text">আবুল কালাম মিয়া</span>
+    <!-- The main container now uses w-full for full-screen width on large screens -->
+    <div class="w-full p-6 sm:p-10 md:p-12 bg-gradient-to-br from-white to-gray-100 rounded-xl shadow-2xl">
+        <!-- Merged Header Title with Main Container -->
+        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-0">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
         </div>
         
-        <!-- Start Screen --><div id="start-screen">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-300 mb-6 animate-bounce text-center quiz-overlay-text">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
-            <p class="text-xl font-extrabold text-pink-300 mb-10 text-center shadow-md quiz-overlay-text">প্রতিদিন পরীক্ষা নেওয়া হয় ,আমার আইডিতে ।আপনার প্রস্তুতি যাচাই করতে প্রতিদিন পরীক্ষা দিন। আইডি ফলো করে রাখবেন অবশ্যই ।</p>
-            <!-- Input is purposefully dark on light background --><input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-gray-800">
+        <!-- Start Screen -->
+        <div id="start-screen" class="mt-8">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-600 mb-6 animate-bounce text-center">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
+            <p class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-pink-500 mb-10 text-center">প্রতিদিন পরীক্ষা নেওয়া হয় ,আমার আইডিতে ।আপনার প্রস্তুতি যাচাই করতে প্রতিদিন পরীক্ষা দিন। আইডি ফলো করে রাখবেন অবশ্যই ।</p>
+            <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-gray-800">
             <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-305 hover:scale-105">কুইজ শুরু করুন</button>
+                <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
                 <button id="view-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
             </div>
         </div>
 
-        <!-- Quiz Screen (All questions on one page) --><div id="quiz-screen" class="hidden">
-            <h2 class="text-3xl font-bold mb-6 text-center quiz-overlay-text">কুইজ প্রশ্নাবলী</h2>
-            
-            <!-- The form container for all questions --><form id="questions-form" class="space-y-6">
-                <!-- Questions will be dynamically inserted here by JavaScript --><p class="text-center quiz-overlay-text">প্রশ্ন লোড হচ্ছে...</p>
+        <!-- Quiz Screen (Single Page Scrollable) -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6 text-gray-700 font-semibold text-lg sm:text-xl border-b pb-4">
+                <span id="question-counter" class="text-xl font-bold">মোট প্রশ্ন: ${questions.length}টি</span>
+                <span id="score-display" class="text-xl font-bold text-blue-600">স্কোর: ০০</span>
+            </div>
+           
+            <!-- Removed fixed height and scroll bar for full content height -->
+            <form id="quiz-form" class="space-y-8 pr-2">
+                <!-- Questions will be dynamically inserted here -->
             </form>
 
             <div class="mt-8 text-center">
-                <button id="submit-quiz-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ জমা দিন (Submit)</button>
+                <button id="submit-quiz-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-12 rounded-full text-xl focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105 shadow-xl">কুইজ জমা দিন</button>
             </div>
         </div>
 
-        <!-- Results Screen --><div id="results-screen" class="hidden text-center">
-            <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-4 quiz-overlay-text">অভিনন্দন!</h2>
-            <p id="final-score-text" class="text-xl sm:text-2xl mb-6 font-bold quiz-overlay-text"></p>
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-4">অভিনন্দন!</h2>
+            <p id="final-score-text" class="text-xl sm:text-2xl text-gray-700 mb-6 font-bold"></p>
             
-            <!-- Answer Review Section: Now FULLY TRANSPARENT for clarity -->
-            <div class="text-left mb-8 translucent-bg p-4 rounded-lg max-h-96 overflow-y-auto">
-                <h3 class="text-2xl font-bold quiz-overlay-text mb-4 border-b pb-2 border-white/50">উত্তর পর্যালোচনা</h3>
+            <!-- Answer Review Section - No separate background here -->
+            <div class="text-left mb-8 pr-2">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">উত্তর পর্যালোচনা</h3>
                 <div id="review-container" class="space-y-4">
                     <!-- Review items will be dynamically inserted here -->
                 </div>
             </div>
 
-            <!-- HIGHLIGHTED FOLLOW MESSAGE AND LINK (Keep quiz-overlay-text for colors) --><div class="mb-8">
-                <p class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg mb-4 quiz-overlay-text">
+            <!-- HIGHLIGHTED FOLLOW MESSAGE AND LINK -->
+            <div class="mb-8">
+                <p class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-pink-500 mb-4">
                     ভালো লাগলে আমার আইডি ফলো করে রাখুন।
                 </p>
-                <a href="https://www.facebook.com/share/16WqmPLahJ/" target="_blank" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105 shadow-md">
+                <a href="https://www.facebook.com/share/16WqmPLahJ/" target="_blank" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105 shadow-md">
                     আমার আইডি লিংক
                 </a>
             </div>
@@ -238,85 +185,54 @@
             </div>
         </div>
 
-        <!-- Merit List Page: Now FULLY TRANSPARENT for clarity --><div id="merit-list-page" class="hidden">
-            <h3 class="text-4xl sm:text-5xl font-extrabold quiz-overlay-text mb-8 text-center">মেধা তালিকা</h3>
-            <div class="translucent-bg rounded-lg p-6 mb-8">
-                <!-- Merit List Header --><div class="merit-list-header p-3 bg-white/20 rounded-t-lg border-b border-white/80">
-                    <span class="quiz-overlay-text">Rank</span>
-                    <span class="quiz-overlay-text">নাম</span>
-                    <span class="text-right quiz-overlay-text">স্কোর</span>
+        <!-- Merit List Page -->
+        <div id="merit-list-page" class="hidden">
+            <h3 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-8 text-center">মেধা তালিকা</h3>
+            <div class="p-0">
+                <!-- Merit List Header: Uses no explicit BG to blend with the Canvas gradient -->
+                <div class="merit-list-header p-3 text-gray-700 border-b-2 border-gray-400">
+                    <span>Rank</span>
+                    <span>নাম</span>
+                    <span class="text-right">স্কোর</span>
                 </div>
-                <!-- Merit List Items --><ul id="merit-list" class="divide-y divide-white/20">
-                    <!-- Merit list items will be dynamically inserted here --></ul>
+                <!-- Merit List Items: Uses custom CSS to ensure blend/pure background -->
+                <ul id="merit-list" class="divide-y divide-gray-200">
+                    <!-- Merit list items will be dynamically inserted here -->
+                </ul>
             </div>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">PDF ডাউনলোড করুন</button>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center mt-6">
+                <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">PDF ডাউনলোড করুন</button>
                 <button id="go-back-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">ফিরে যান</button>
             </div>
         </div>
     </div>
 
-    <!-- Updated Firebase v11 Modular API Imports and Logic --><script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, onSnapshot, addDoc, where, getDocs, deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // setLogLevel import removed as it's not strictly necessary for functionality
-
+    <script type="text/javascript">
         // Global listeners to prevent copying and right-click
         document.addEventListener('contextmenu', (e) => e.preventDefault());
         document.addEventListener('copy', (e) => { e.preventDefault(); showModal('কুইজের প্রশ্ন কপি করা যাবে না।'); });
         document.addEventListener('cut', (e) => { e.preventDefault(); showModal('কুইজের প্রশ্ন কপি করা যাবে না।'); });
 
-        // --- Global Variables and Firebase Setup (Canvas Mandate) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Firebase কনফিগারেশন। এটি আপনার প্রজেক্টের সাথে যুক্ত করার জন্য প্রয়োজন।
+        // Firebase কনসোল থেকে এই কোডটি কপি করে এখানে পেস্ট করুন।
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRndsLdL_AT0VxJctOfWOR64410ceH91Q",
+            authDomain: "apps-89bec.firebaseapp.com",
+            projectId: "apps-89bec",
+            storageBucket: "apps-89bec.firebasestorage.app",
+            messagingSenderId: "460356178253",
+            appId: "1:460356178253:web:1f88da365acb445dbda704",
+            measurementId: "G-2QGC51N1X7"
+        };
         
-        let db;
-        let auth;
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
         let userId = null;
         let isAuthReady = false;
-        const loadingScreen = document.getElementById('loading');
-        const loadingMessage = document.getElementById('loading-message');
-        
-        // --- NOTE: Dynamic Image Generation Code REMOVED ---
 
-        if (firebaseConfig) {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-
-            // Authentication logic
-            (async () => {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Signed in with custom token.");
-                    } else {
-                        await signInAnonymously(auth);
-                        console.log("Signed in anonymously.");
-                    }
-                    userId = auth.currentUser.uid;
-                    isAuthReady = true;
-                    // Auth successful, now set up the listener
-                    setupMeritListListener();
-                    
-                    // CRITICAL CHANGE: Initialize UI immediately after auth (no image generation wait)
-                    initializeAppUI();
-
-                } catch (error) {
-                    console.error("Firebase Auth Error:", error);
-                    showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
-                    loadingScreen.classList.add('hidden'); // Hide loading if auth fails
-                }
-            })();
-        } else {
-            console.error("Firebase configuration is missing.");
-            showModal("Firebase কনফিগারেশন পাওয়া যায়নি। অ্যাপ কাজ নাও করতে পারে।");
-            loadingScreen.classList.add('hidden');
-        }
-        
-        // --- UI elements ---
+        // UI elements
         const startScreen = document.getElementById('start-screen');
         const quizScreen = document.getElementById('quiz-screen');
         const resultsScreen = document.getElementById('results-screen');
@@ -324,15 +240,17 @@
         const userNameInput = document.getElementById('user-name');
         const startQuizBtn = document.getElementById('start-quiz-btn');
         const viewMeritListBtn = document.getElementById('view-merit-list-btn');
-        const questionsForm = document.getElementById('questions-form');
+        const quizForm = document.getElementById('quiz-form');
         const submitQuizBtn = document.getElementById('submit-quiz-btn');
-
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score-display');
         const finalScoreText = document.getElementById('final-score-text');
         const restartQuizBtn = document.getElementById('restart-quiz-btn');
         const returnToMeritListBtn = document.getElementById('return-to-merit-list-btn');
         const meritList = document.getElementById('merit-list');
         const downloadPdfBtn = document.getElementById('download-pdf-btn');
         const goBackBtn = document.getElementById('go-back-btn');
+        const loadingScreen = document.getElementById('loading');
         const modal = document.getElementById('modal');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -343,8 +261,9 @@
         let meritListData = [];
         let userAnswers = []; // To store user selections for review
         
-        // --- Quiz ID (Should be unique for each new quiz set) ---
-        const quizId = 'quiz-set-41'; 
+        // --- নতুন প্রশ্ন সেট হলে এটি পরিবর্তন করুন ---
+        const quizId = 'quiz-set-42'; 
+        // --- ---
 
         // Quiz questions
         const questions = [
@@ -395,34 +314,36 @@
             }
         ];
         
+        // --- Authentication ---
+        auth.signInAnonymously().then((userCredential) => {
+            userId = userCredential.user.uid;
+            isAuthReady = true;
+            setupMeritListListener(); 
+        }).catch((error) => {
+            console.error("Firebase Auth Error:", error);
+            showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+        });
+
         // --- Merit List ---
         const setupMeritListListener = () => {
-            if (!isAuthReady || !db) return;
-
-            // CORRECTED: Using Canvas public data path: /artifacts/{appId}/public/data/quiz_results/{quizId}/scores
-            const scoresCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'quiz_results', quizId, 'scores');
+            if (!isAuthReady) return;
+            // Collection path: quiz_results/{quizId}/scores
+            const meritListRef = db.collection('quiz_results').doc(quizId).collection('scores');
             
-            // CRITICAL: Removed orderBy() from query. Relying on client-side sort.
-            const q = query(scoresCollectionRef);
-            
-            onSnapshot(q, (snapshot) => {
+            meritListRef.orderBy('score', 'desc').onSnapshot(snapshot => {
                 const results = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
+                    data.docId = doc.id; 
                     results.push(data);
                 });
-                
-                // Client-side Sort: by score (desc) then by timestamp (asc for tie-breaker)
+                // Sort by score (descending) then by timestamp (ascending for tie-breaker)
                 results.sort((a, b) => {
                     if (b.score !== a.score) {
                         return b.score - a.score;
                     }
-                    // Handle timestamp tie-breaker (earlier submission wins)
                     if (a.timestamp && b.timestamp) {
-                         // Firestore Timestamp needs to be converted to Date for reliable comparison
-                        const aTime = a.timestamp.toDate ? a.timestamp.toDate().getTime() : Infinity;
-                        const bTime = b.timestamp.toDate ? b.timestamp.toDate().getTime() : Infinity;
-                        return aTime - bTime;
+                        return a.timestamp.toDate() - b.timestamp.toDate();
                     }
                     return 0;
                 });
@@ -435,174 +356,167 @@
             });
         };
 
-        // --- UPDATED: getRankDesign now returns classes based on sequential index ---
         const getRankDesign = (index) => {
-            if (index === 0) return 'rank-highlight-1';
-            if (index === 1) return 'rank-highlight-2';
-            if (index === 2) return 'rank-highlight-3';
-            return 'rank-standard';
+            // Rank 1, 2, 3 designs are kept for visual distinction
+            if (index === 0) return 'bg-yellow-400 text-yellow-900 font-extrabold shadow-lg';
+            if (index === 1) return 'bg-gray-400 text-gray-900 font-bold shadow-md';
+            if (index === 2) return 'bg-orange-300 text-orange-900 font-semibold shadow';
+            // All other backgrounds are explicitly transparent (no color) to match the main canvas gradient
+            return 'text-gray-700'; 
         };
 
         const renderMeritList = () => {
             meritList.innerHTML = '';
             if (meritListData.length === 0) {
-                // Ensure text is white for transparent background
-                meritList.innerHTML = `<li class="text-center text-white/70 italic p-4">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
+                meritList.innerHTML = `<li class="text-center text-gray-500 italic p-4">এখনও কোনো ফলাফল জমা পড়েনি।</li>`;
                 return;
             }
             
-            // --- UPDATED: Use Sequential Rank (index + 1) ---
+            // --- Implement Rank Sharing Logic ---
+            let currentRank = 1;
+            
             meritListData.forEach((result, index) => {
-                // Sequential Rank (1, 2, 3, 4, 5...)
-                const currentRank = index + 1; 
-
-                // Determine Rank Text (1st, 2nd, 3rd, or sequential number)
+                if (index > 0 && result.score < meritListData[index - 1].score) {
+                    currentRank = index + 1;
+                }
+                
                 const rankText = currentRank === 1 ? '১ম' : 
                                  currentRank === 2 ? '২য়' : 
                                  currentRank === 3 ? '৩য়' : 
-                                 currentRank + '.'; 
+                                 currentRank + '.';
                                  
-                const rankClass = getRankDesign(index); // Use index (0, 1, 2...) for highlighting
+                const rankClass = getRankDesign(currentRank - 1); 
 
                 const li = document.createElement('li');
-                // Use the rankClass for styling/highlighting
-                li.className = `merit-list-item p-4 text-lg border-b border-white/20 ${rankClass} transition duration-150`;
+                li.className = `merit-list-item p-4 text-lg transition duration-150 ${rankClass}`;
                 
-                // Ensure text inside list item uses overlay text styles and Rank is dynamic
                 li.innerHTML = `
-                    <span class="text-center font-extrabold quiz-overlay-text">${rankText}</span>
-                    <span class="truncate quiz-overlay-text">${result.name}</span>
-                    <span class="font-bold text-right quiz-overlay-text">${result.score}/${questions.length}</span>
+                    <span class="text-center font-extrabold">${rankText}</span>
+                    <span class="truncate">${result.name}</span>
+                    <span class="font-bold text-right">${result.score}/${questions.length}</span>
                 `;
                 meritList.appendChild(li);
             });
         };
         
         // --- Quiz Functions ---
-        const renderAllQuestions = () => {
-            questionsForm.innerHTML = ''; // Clear previous questions
-            
-            questions.forEach((q, index) => {
-                const questionElement = document.createElement('div');
-                // Updated class for clean contrast
-                questionElement.className = "question-block p-4 transition duration-150 border-b border-white/40"; // Keeping divider for transparent form
-                questionElement.setAttribute('data-question-index', index);
-                
-                let optionsHtml = '';
-                q.options.forEach((option, optIndex) => {
-                    const optionId = `q${index}-o${optIndex}`;
-                    const inputName = `question-${index}`;
-
-                    optionsHtml += `
-                        <label for="${optionId}" class="flex items-start mb-2 p-3 rounded-lg transition duration-150 bg-white/10 hover:bg-white/20 cursor-pointer border border-white/40 shadow-sm">
-                            <input type="radio" id="${optionId}" name="${inputName}" value="${option}" class="mt-1 mr-3 h-5 w-5 text-blue-300 focus:ring-blue-500 border-white/40 bg-transparent">
-                            <span class="ml-2 text-base quiz-overlay-text">${option}</span>
-                        </label>
-                    `;
-                });
-
-                questionElement.innerHTML = `
-                    <p class="text-xl font-semibold mb-3 quiz-overlay-text">${q.question}</p>
-                    <div class="options-group space-y-1 mt-3">
-                        ${optionsHtml}
-                    </div>
-                `;
-                questionsForm.appendChild(questionElement);
-            });
-
-             // Apply fixed height and scrolling after rendering
-            questionsForm.style.maxHeight = '90vh'; 
-            questionsForm.style.overflowY = 'auto';
-            questionsForm.style.padding = '1rem';
-            // KEEPING TRANSPARENT STYLES HERE
-            questionsForm.style.backgroundColor = 'transparent';
-            questionsForm.style.border = 'none';
-        };
-
-
-        
-        const initializeAppUI = async () => {
-            // No image generation needed, so directly hide loading and show start screen
-            loadingScreen.classList.add('hidden'); 
-            showScreen('start');
-        };
-
         const startQuiz = () => {
             const userName = userNameInput.value.trim();
             if (userName === '') {
                 showModal('কুইজ শুরু করার আগে আপনার নাম লিখুন।');
                 return;
             }
-            
             showScreen('quiz');
             score = 0;
             userAnswers = []; 
-            renderAllQuestions(); // Render all questions on the page
+            renderAllQuestions();
         };
-        
-        const submitQuiz = () => {
-             // 1. Check for unanswered questions
-            const unanswered = [];
+
+        const renderAllQuestions = () => {
+            quizForm.innerHTML = '';
+            questionCounter.textContent = `মোট প্রশ্ন: ${questions.length}টি`;
+            scoreDisplay.textContent = `স্কোর: ০০`;
+
             questions.forEach((q, index) => {
-                const inputName = `question-${index}`;
-                // Check if any radio button in the group is checked
-                const checked = questionsForm.querySelector(`input[name="${inputName}"]:checked`);
-                if (!checked) {
-                    unanswered.push(index + 1);
-                }
+                const questionDiv = document.createElement('div');
+                // Alada background o shadow remove kora holo.
+                questionDiv.className = 'p-5'; 
+                questionDiv.innerHTML = `<h3 class="text-xl font-bold text-gray-800 mb-4">${q.question}</h3>`;
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'space-y-3';
+                
+                q.options.forEach((option, optionIndex) => {
+                    const optionId = `q${index}-opt${optionIndex}`;
+                    const radioInput = `<input type="radio" id="${optionId}" name="q${index}" value="${option}" class="custom-radio">`;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = optionId;
+                    label.className = 'option-label';
+                    label.innerHTML = `${radioInput} <span>${option}</span>`;
+                    
+                    optionsDiv.appendChild(label);
+                });
+                
+                questionDiv.appendChild(optionsDiv);
+                quizForm.appendChild(questionDiv);
             });
+        };
 
-            if (unanswered.length > 0) {
-                showModal(`অনুগ্রহ করে সব প্রশ্নের উত্তর দিন। উত্তর দেওয়া হয়নি: ${unanswered.join(', ')}`);
-                return;
-            }
-
-            // 2. Start scoring and collecting user answers
+        const handleSubmit = () => {
             score = 0;
             userAnswers = [];
+            let unansweredCount = 0;
             
-            questions.forEach((q, index) => {
-                const inputName = `question-${index}`;
-                const selectedInput = questionsForm.querySelector(`input[name="${inputName}"]:checked`);
-                const userSelected = selectedInput ? selectedInput.value : "উত্তর দেওয়া হয়নি"; 
-                const isCorrect = userSelected === q.answer;
+            questions.forEach((question, index) => {
+                const radioName = `q${index}`;
+                const selectedInput = document.querySelector(`input[name="${radioName}"]:checked`);
+                const selectedOption = selectedInput ? selectedInput.value : null;
+
+                if (!selectedOption) {
+                    unansweredCount++;
+                }
+
+                const isCorrect = selectedOption === question.answer;
+
+                userAnswers.push({
+                    question: question.question,
+                    correctAnswer: question.answer,
+                    userSelected: selectedOption || 'উত্তর দেওয়া হয়নি',
+                    isCorrect: isCorrect
+                });
 
                 if (isCorrect) {
                     score++;
                 }
+            });
 
-                userAnswers.push({
-                    question: q.question,
-                    correctAnswer: q.answer,
-                    userSelected: userSelected,
-                    isCorrect: isCorrect
+            if (unansweredCount > 0) {
+                // Modified to show a clear modal and prevent submission
+                showModal(`আপনি ${unansweredCount}টি প্রশ্নের উত্তর দেননি। উত্তর না দিয়ে কুইজ জমা দেওয়া সম্ভব নয়।`);
+                return; // Prevent submission
+            }
+
+            // Disable all radio buttons after submission
+            const allRadios = quizForm.querySelectorAll('input[type="radio"]');
+            allRadios.forEach(radio => radio.disabled = true);
+            
+            // Mark correct/incorrect answers visually
+            questions.forEach((question, index) => {
+                const questionDiv = quizForm.children[index];
+                question.options.forEach((option, optionIndex) => {
+                    const optionId = `q${index}-opt${optionIndex}`;
+                    const label = questionDiv.querySelector(`label[for="${optionId}"]`);
+                    const radio = questionDiv.querySelector(`#${optionId}`);
+
+                    if (option === question.answer) {
+                        label.classList.add('correct');
+                    } else if (radio.checked) {
+                        label.classList.add('incorrect');
+                    }
                 });
             });
 
-            // 3. Display results and save score
-            showResults();
+            // Show results after a short delay to see the visual feedback
+            setTimeout(() => {
+                showResults();
+            }, 1000);
         };
-
 
         const renderQuizReview = () => {
             reviewContainer.innerHTML = '';
             userAnswers.forEach((answer, index) => {
+                const reviewItem = document.createElement('div');
                 const isCorrect = answer.isCorrect;
-                // Since the container is transparent, we rely on colored backgrounds for item distinction
-                const textColor = isCorrect ? 'text-green-900' : 'text-red-900'; // Darker text for better contrast on light item background
-                const bgColorClass = isCorrect ? 'bg-green-300/80' : 'bg-red-300/80'; // Translucent, slightly brighter color for contrast
+                const textColor = isCorrect ? 'text-green-700' : 'text-red-700';
                 const icon = isCorrect ? '✅' : '❌';
                 const selectedText = answer.userSelected; 
 
-                const reviewItem = document.createElement('div');
-                // Set the item background and border
-                reviewItem.className = `p-4 rounded-lg border border-white/50 ${bgColorClass}`; 
-                
-                // Use dark text for clarity within the colored/light item background
+                reviewItem.className = `p-2 rounded-lg border-b border-gray-200`; 
                 reviewItem.innerHTML = `
                     <p class="font-bold text-lg mb-2 ${textColor}">${index + 1}. ${answer.question} <span class="float-right">${icon}</span></p>
-                    <p class="text-sm text-gray-900">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
-                    <p class="text-sm text-gray-900">সঠিক উত্তর: <span class="text-green-800 font-semibold">✅ ${answer.correctAnswer}</span></p>
+                    <p class="text-sm">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
+                    <p class="text-sm">সঠিক উত্তর: <span class="text-green-600 font-semibold">${answer.correctAnswer}</span></p>
                 `;
                 reviewContainer.appendChild(reviewItem);
             });
@@ -614,41 +528,36 @@
             finalScoreText.textContent = `আপনার স্কোর: ${score}/${questions.length}`;
             renderQuizReview(); // Show the review section
             
-            if (isAuthReady && db && userId) {
+            if (isAuthReady) {
                 loadingScreen.classList.remove('hidden');
-                loadingMessage.textContent = 'ফলাফল সংরক্ষণ করা হচ্ছে...';
                 try {
-                    // CORRECTED: Using Canvas public data path and modular API
-                    const scoresCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'quiz_results', quizId, 'scores');
+                    const scoresRef = db.collection('quiz_results').doc(quizId).collection('scores');
                     
                     // 1. Check for existing score from this user
-                    const existingScoreQuery = query(scoresCollectionRef, where('userId', '==', userId));
-                    const existingDocs = await getDocs(existingScoreQuery);
+                    const existingScoreQuery = await scoresRef.where('userId', '==', userId).get();
                     
-                    if (!existingDocs.empty) {
+                    if (!existingScoreQuery.empty) {
                         // 2. If existing score found, delete it to ensure only one entry per user
-                        const docToDelete = existingDocs.docs[0];
-                        await deleteDoc(doc(scoresCollectionRef, docToDelete.id));
-                        console.log("Deleted old score:", docToDelete.id);
+                        const docToDelete = existingScoreQuery.docs[0].id;
+                        await scoresRef.doc(docToDelete).delete();
                     }
 
                     // 3. Save the new score
-                    await addDoc(scoresCollectionRef, {
+                    await scoresRef.add({
                         userId: userId, // Add userId to track the user
                         name: userNameInput.value.trim(),
                         score: score,
-                        timestamp: serverTimestamp() // Modular API for server timestamp
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    console.log("New score saved.");
 
                 } catch (e) {
-                    console.error("Error saving document: ", e);
+                    console.error("Error adding document: ", e);
                     showModal("ফলাফল সংরক্ষণ করতে সমস্যা হয়েছে। অনুগ্রহ করে Firebase Rules চেক করুন।");
                 } finally {
                     loadingScreen.classList.add('hidden');
                 }
             } else {
-                console.log("Not authenticated or Firebase not ready, skipping Firestore save.");
+                console.log("Not authenticated, skipping Firestore save.");
             }
         };
 
@@ -663,11 +572,6 @@
             resultsScreen.classList.add('hidden');
             meritListPage.classList.add('hidden');
             
-            // Show loading screen initially for auth/merit list fetch
-            if (screenName !== 'loading') {
-                loadingScreen.classList.add('hidden');
-            }
-
             if (screenName === 'start') {
                 startScreen.classList.remove('hidden');
             } else if (screenName === 'quiz') {
@@ -687,26 +591,24 @@
             // 1. Set Title Font Size larger
             doc.setFontSize(16); 
             
-            // Note: Bangla font is completely removed from PDF logic to ensure clear English output
+            // Bangla font is completely removed from PDF logic to ensure clear English output
             const tableColumn = ["Rank", "Name", "Score"];
             const tableRows = [];
             
             let currentRank = 1;
-            let currentScore = -1;
 
             meritListData.forEach((item, index) => {
-                if (item.score < currentScore) {
+                if (index > 0 && item.score < meritListData[index - 1].score) {
                     currentRank = index + 1;
                 }
-                currentScore = item.score;
                 
                 const rankText = currentRank === 1 ? '1st' : 
                                  currentRank === 2 ? '2nd' : 
                                  currentRank === 3 ? '3rd' : 
                                  currentRank + '.';
 
-                const row = [item.name, item.score, `${item.score}/${questions.length}`]; // Adjusted for table structure
-                tableRows.push([rankText, item.name, `${item.score}/${questions.length}`]);
+                const row = [rankText, item.name, `${item.score}/${questions.length}`];
+                tableRows.push(row);
             });
             
             doc.text("Quiz Merit List", 14, 20);
@@ -715,16 +617,17 @@
                 head: [tableColumn], 
                 body: tableRows, 
                 startY: 25,
+                // 2. Increase font size for body and header
                 styles: { 
-                    fontSize: 12,
+                    fontSize: 12, // Increased font size for body cells
                     cellPadding: 3,
                 },
                 headStyles: {
-                    fontSize: 14,
+                    fontSize: 14, // Increased font size for header
                     fillColor: [52, 73, 94] 
                 }
             });
-            doc.save(`quiz_merit_list_${quizId}.pdf`);
+            doc.save('quiz_merit_list.pdf');
         };
 
         // --- Modal Functionality ---
@@ -743,10 +646,9 @@
         restartQuizBtn.addEventListener('click', restartQuiz);
         returnToMeritListBtn.addEventListener('click', () => showScreen('merit-list'));
         downloadPdfBtn.addEventListener('click', downloadPDF);
-        goBackBtn.addEventListener('click', restartQuiz); // Go back takes user to start screen
+        goBackBtn.addEventListener('click', () => showScreen('start'));
         modalCloseBtn.addEventListener('click', closeModal);
-        submitQuizBtn.addEventListener('click', submitQuiz); // New submit button listener
-
+        submitQuizBtn.addEventListener('click', handleSubmit);
     </script>
 </body>
 </html>
