@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>পরীক্ষা-৩২</title>
+    <title>পরীক্ষা-৩৫</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -13,7 +13,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #16a085; /* Dark Green */
+            background-color: #ffffff; /* Body Background: White */
             user-select: none; /* Text copying disabled */
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -40,10 +40,72 @@
                 font-size: 0.9rem;
             }
         }
+
+        /* Hide default radio button and use custom style */
+        .custom-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            border: 2px solid white; /* Changed border to WHITE for visibility */
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            margin-right: 0.75rem;
+            top: 2px;
+        }
+
+        .custom-radio:checked {
+            background-color: white; /* Changed center to WHITE when checked */
+            border: 2px solid #1d4ed8;
+        }
+
+        .custom-radio:checked::after {
+            content: '';
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: #3b82f6; /* Center dot color to BLUE */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Style for the option container to show the button-like behavior */
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            cursor: pointer;
+            border-radius: 0.75rem;
+            background: linear-gradient(to right, #4c7cff, #6f8cfd); /* Blue Gradient */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            font-size: 1.125rem;
+        }
+
+        .option-label:hover {
+             transform: scale(1.02);
+             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style for disabled/checked state */
+        .option-label.correct {
+            background: linear-gradient(to right, #10b981, #34d399); /* Green Gradient */
+        }
+        .option-label.incorrect {
+            background: linear-gradient(to right, #ef4444, #f87171); /* Red Gradient */
+        }
+
     </style>
 </head>
-<body class="bg-[#16a085] min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
+<body class="bg-[#ffffff] min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
 
+    <!-- Loading, Modal elements remain fixed -->
     <div id="loading" class="absolute inset-0 bg-white/70 flex items-center justify-center z-50 hidden">
         <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -59,34 +121,39 @@
         </div>
     </div>
 
-    <div class="w-full max-w-6xl bg-white rounded-xl shadow-2xl p-6 sm:p-10 md:p-12">
-        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-8">
+    <!-- The main container now uses w-full for full-screen width on large screens,
+         and is visually merged with the body by removing shadow and background -->
+    <div class="w-full p-6 sm:p-10 md:p-12">
+        <!-- Merged Header Title with Main Container -->
+        <div class="text-center font-bold text-gray-800 text-3xl sm:text-4xl mb-0">
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-500">আবুল কালাম মিয়া</span>
         </div>
         
         <!-- Start Screen -->
-        <div id="start-screen">
+        <div id="start-screen" class="mt-8">
             <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-blue-600 mb-6 animate-bounce text-center">কুইজ প্রতিযোগিতায় স্বাগতম!</h1>
-            <p class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-pink-500 mb-10 text-center shadow-md">প্রতিদিন পরীক্ষা নেওয়া হয় ,আমার আইডিতে ।আপনার প্রস্তুতি যাচাই করতে প্রতিদিন পরীক্ষা দিন। আইডি ফলো করে রাখবেন অবশ্যই ।</p>
-            <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+            <p class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-pink-500 mb-10 text-center">প্রতিদিন পরীক্ষা নেওয়া হয় ,আমার আইডিতে ।আপনার প্রস্তুতি যাচাই করতে প্রতিদিন পরীক্ষা দিন। আইডি ফলো করে রাখবেন অবশ্যই ।</p>
+            <input type="text" id="user-name" placeholder="আপনার নাম লিখুন (ইংরেজিতে)" class="w-full max-w-md mx-auto block px-5 py-4 mb-8 border border-gray-300 rounded-lg text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-gray-800">
             <div class="flex flex-col sm:flex-row gap-6 justify-center">
                 <button id="start-quiz-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">কুইজ শুরু করুন</button>
                 <button id="view-merit-list-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">মেধা তালিকা দেখুন</button>
             </div>
         </div>
 
-        <!-- Quiz Screen -->
+        <!-- Quiz Screen (Single Page Scrollable) -->
         <div id="quiz-screen" class="hidden">
-             <!-- TIMER COUNTDOWN ELEMENT REMOVED -->
-            
-            <div class="flex justify-between items-center mb-6 text-gray-700 font-semibold text-lg sm:text-xl">
-                <span id="question-counter" class="text-lg sm:text-xl">প্রশ্ন ১/৩০</span>
-                <span id="score-display" class="text-lg sm:text-xl">স্কোর: ০</span>
+            <div class="flex justify-between items-center mb-6 text-gray-700 font-semibold text-lg sm:text-xl border-b pb-4">
+                <span id="question-counter" class="text-xl font-bold">মোট প্রশ্ন: ${questions.length}টি</span>
+                <span id="score-display" class="text-xl font-bold text-blue-600">স্কোর: ০০</span>
             </div>
            
-            <h2 id="question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-8"></h2>
-            <div id="options-container" class="space-y-4">
-                <!-- Options will be dynamically inserted here -->
+            <!-- Removed fixed height and scroll bar for full content height -->
+            <form id="quiz-form" class="space-y-8 pr-2">
+                <!-- Questions will be dynamically inserted here -->
+            </form>
+
+            <div class="mt-8 text-center">
+                <button id="submit-quiz-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-12 rounded-full text-xl focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105 shadow-xl">কুইজ জমা দিন</button>
             </div>
         </div>
 
@@ -95,8 +162,8 @@
             <h2 class="text-4xl sm:text-5xl font-extrabold text-green-600 mb-4">অভিনন্দন!</h2>
             <p id="final-score-text" class="text-xl sm:text-2xl text-gray-700 mb-6 font-bold"></p>
             
-            <!-- Answer Review Section -->
-            <div class="text-left mb-8 bg-gray-100 p-4 rounded-lg shadow-inner max-h-96 overflow-y-auto">
+            <!-- Answer Review Section - No separate background here -->
+            <div class="text-left mb-8 pr-2">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">উত্তর পর্যালোচনা</h3>
                 <div id="review-container" class="space-y-4">
                     <!-- Review items will be dynamically inserted here -->
@@ -105,7 +172,7 @@
 
             <!-- HIGHLIGHTED FOLLOW MESSAGE AND LINK -->
             <div class="mb-8">
-                <p class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg mb-4">
+                <p class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-pink-500 mb-4">
                     ভালো লাগলে আমার আইডি ফলো করে রাখুন।
                 </p>
                 <a href="https://www.facebook.com/share/16WqmPLahJ/" target="_blank" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105 shadow-md">
@@ -122,19 +189,19 @@
         <!-- Merit List Page -->
         <div id="merit-list-page" class="hidden">
             <h3 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-8 text-center">মেধা তালিকা</h3>
-            <div class="bg-gray-50 rounded-lg p-6 shadow-inner mb-8">
-                <!-- Merit List Header -->
-                <div class="merit-list-header p-3 bg-gray-300 rounded-t-lg text-gray-700 border-b border-gray-400">
+            <div class="p-0">
+                <!-- Merit List Header: Uses no explicit BG to blend with the Canvas gradient -->
+                <div class="merit-list-header p-3 text-gray-700 border-b-2 border-gray-400">
                     <span>Rank</span>
                     <span>নাম</span>
                     <span class="text-right">স্কোর</span>
                 </div>
-                <!-- Merit List Items -->
+                <!-- Merit List Items: Uses custom CSS to ensure blend/pure background -->
                 <ul id="merit-list" class="divide-y divide-gray-200">
                     <!-- Merit list items will be dynamically inserted here -->
                 </ul>
             </div>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+            <div class="flex flex-col sm:flex-row gap-6 justify-center mt-6">
                 <button id="download-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transition duration-300 transform hover:scale-105">PDF ডাউনলোড করুন</button>
                 <button id="go-back-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 px-10 rounded-full text-lg focus:outline-none focus:shadow-outline transform transition duration-300 hover:scale-105">ফিরে যান</button>
             </div>
@@ -174,8 +241,8 @@
         const userNameInput = document.getElementById('user-name');
         const startQuizBtn = document.getElementById('start-quiz-btn');
         const viewMeritListBtn = document.getElementById('view-merit-list-btn');
-        const questionText = document.getElementById('question-text');
-        const optionsContainer = document.getElementById('options-container');
+        const quizForm = document.getElementById('quiz-form');
+        const submitQuizBtn = document.getElementById('submit-quiz-btn');
         const questionCounter = document.getElementById('question-counter');
         const scoreDisplay = document.getElementById('score-display');
         const finalScoreText = document.getElementById('final-score-text');
@@ -189,171 +256,67 @@
         const modalMessage = document.getElementById('modal-message');
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const reviewContainer = document.getElementById('review-container');
-        // Removed: const timerCountdown = document.getElementById('timer-countdown');
 
         // Quiz state variables
-        let currentQuestionIndex = 0;
         let score = 0;
         let meritListData = [];
         let userAnswers = []; // To store user selections for review
-        // Removed: let quizTimer;
-        // Removed: const TIME_LIMIT = 10;
         
         // --- নতুন প্রশ্ন সেট হলে এটি পরিবর্তন করুন ---
-        const quizId = 'quiz-set-40'; // নতুন প্রশ্ন সেট হলে এখানে একটি নতুন আইডি দিন, যেমন 'quiz-set-02'
+        const quizId = 'quiz-set-43'; 
         // --- ---
 
         // Quiz questions
         const questions = [
             {
-                question: "১. ইয়ংবেঙ্গল গোষ্ঠীভুক্ত ছিলেন কে? (৪০তম বিসিএস)",
-                options: ["ক. অক্ষয়কুমার দত্ত", "খ. এন্টনি ফিরঙ্গি", "গ. মাইকেল মধুসূদন দত্ত", "ঘ. কালীপ্রসন্ন সিংহ ঠাকুর"],
-                answer: "গ. মাইকেল মধুসূদন দত্ত"
+                question: "১. বাংলাদেশের রাষ্ট্রীয় প্রতীকের ডিজাইনার কে? (কর্মসংস্থান ব্যাংকের ডাটা এন্ট্রি অপারেটর: ২৩/ রাজউক এর ইমারত পরিদর্শক: ২২)",
+                options: ["ক) জয়নুল আবেদীন", "খ) এস এম সুলতান", "গ) কামরুল হাসান", "ঘ) মুর্তজা বশীর"],
+                answer: "গ) কামরুল হাসান"
             },
             {
-                question: "২. কে ফোর্ট উইলিয়াম কলেজের শিক্ষক ছিলেন? (৩৮তম বিসিএস)",
-                options: ["ক. হরপ্রসাদ শাস্ত্রী", "খ. রামরাম বসু", "গ. দেবেন্দ্রনাথ ঠাকুর", "ঘ. অক্ষয়কুমার দত্ত"],
-                answer: "খ. রামরাম বসু"
+                question: "২. বাংলাদেশের রাষ্ট্রীয় লোগোটি ডিজাইন করেন- (বাংলাদেশ ব্যাংকের অফিসার: ২৩/ সমন্বিত ৯ ব্যাংকের অফিসার: ২২)",
+                options: ["ক) কামরুল হাসান", "খ) মেজর জেমস রেনেল", "গ) শিবনারায়ণ রায়", "ঘ) এএনএ সাহা"],
+                answer: "ঘ) এএনএ সাহা"
             },
             {
-                question: "৩. 'পূর্ববঙ্গ গীতিকা'র লোকপালাসমূহের সংগ্রাহক কে? (৩৭তম বিসিএস)",
-                options: ["ক. দক্ষিণারঞ্জন মিত্র মজুমদার", "খ. হরপ্রসাদ শাস্ত্রী", "গ. চন্দ্রকুমার দে", "ঘ. দীনেশচন্দ্র সেন"],
-                answer: "গ. চন্দ্রকুমার দে"
+                question: "৩. বাংলাদেশের রাষ্ট্রীয় মনোগ্রামের ডিজাইনার কে? (বিআরডিবি'র উপজেলা পল্লী উন্নয়ন কর্মকর্তা: ২২/ বেসামরিক বিমানের নিরাপত্তা অফিসার: ২১)",
+                options: ["ক) কাজী খসরু", "খ) কামরুল হাসান", "গ) স্বপন কুমার", "ঘ) এএনএ সাহা"],
+                answer: "ঘ) এএনএ সাহা"
             },
             {
-                question: "৪. বাংলা সাহিত্যের ইতিহাস বিষয়ক গ্রন্থসমূহের মধ্যে কোনটি ড. মুহম্মদ শহীদুল্লাহর লেখা? (৩৭তম বিসিএস)",
-                options: ["ক. বঙ্গভাষা ও সাহিত্য", "খ. বাঙ্গালা সাহিত্যের ইতিহাস", "গ. বাংলা সাহিত্যের ইতিবৃত্ত", "ঘ. বাংলা সাহিত্যের কথা"],
-                answer: "ঘ. বাংলা সাহিত্যের কথা"
+                question: "৪. বাংলাদেশের জাতীয় পতাকার ডিজাইনার কে? (২৪তম বিসিএস/১৬তম বিসিএস)",
+                options: ["ক) জয়নুল আবেদীন", "খ) কামরুল হাসান", "গ) হাসেম খান", "ঘ) হামিদুর রহমান"],
+                answer: "খ) কামরুল হাসান"
             },
             {
-                question: "৫. মুহম্মদ আবদুল হাই রচিত ধ্বনিবিজ্ঞান বিষয়ক গ্রন্থের নাম কী? [৩৭তম বিসিএস]",
-                options: ["ক. বাংলা ধ্বনিবিজ্ঞান", "খ. আধুনিক বাংলা ধ্বনিবিজ্ঞান", "গ. ধ্বনিবিজ্ঞানের কথা", "ঘ. ধ্বনিবিজ্ঞান ও বাংলা ধ্বনিতত্ত্ব"],
-                answer: "ঘ. ধ্বনিবিজ্ঞান ও বাংলা ধ্বনিতত্ত্ব"
+                question: "৫. বাংলাদেশের জাতীয় পতাকা কবে গৃহীত হয়? (৩৬তম বিসিএস)",
+                options: ["ক) ১৭ জানুয়ারি, ১৯৭১", "খ) ২৬ মার্চ, ১৯৭১", "গ) ১৬ ডিসেম্বর, ১৯৭১", "ঘ) ২১ ফেব্রুয়ারি, ১৯৭২"],
+                answer: "ক) ১৭ জানুয়ারি, ১৯৭১"
             },
             {
-                question: "৬. রাজা প্রতাপাদিত্য চরিত্র গ্রন্থটির প্রণেতা- (৩৬তম বিসিএস)",
-                options: ["ক. উইলিয়াম কেরি", "খ. গোলকনাথ শর্মা", "গ. রামরাম বসু", "ঘ. হরপ্রসাদ রায়"],
-                answer: "গ. রামরাম বসু"
+                question: "৬. বাংলাদেশের জাতীয় সংগীত সর্বপ্রথম যে পত্রিকায় প্রকাশিত হয়? (জাহাঙ্গীরনগর বিশ্ববিদ্যালয়: ১৫-১৬)",
+                options: ["ক) ইত্তেহাদ", "খ) বঙ্গদর্শন", "গ) সমাচার দর্পণ", "ঘ) সমাচার"],
+                answer: "গ) সমাচার দর্পণ"
             },
             {
-                question: "৭. ইয়ং বেঙ্গল' গোষ্ঠীর মুখপত্ররূপে কোন পত্রিকা প্রকাশিত হয়? [৩৬তম বিসিএস]",
-                options: ["ক. বঙ্গদূত", "খ. জ্ঞানান্বেষণ", "গ. জ্ঞানাঙ্কুর", "ঘ. সংবাদ প্রভাকর"],
-                answer: "খ. জ্ঞানান্বেষণ"
+                question: "৭. বাংলাদেশের 'জাতীয় সংগীত' বিশ্বকবি রবীন্দ্রনাথের কোন কাব্য থেকে নেওয়া হয়েছে? (ঢাকা বিশ্ববিদ্যালয়। ১০-১১)",
+                options: ["ক) বনফুল", "খ) সোনারতরী", "গ) সন্ধ্যাসংগীত", "ঘ) গীতবিতান"],
+                answer: "ঘ) গীতবিতান"
             },
             {
-                question: "৮. বাংলা গদ্যের জনক কে? (৩২তম বিসিএস)",
-                options: ["ক. ঈশ্বরচন্দ্র বিদ্যাসাগর", "খ. বঙ্কিমচন্দ্র চট্টোপাধ্যায়", "গ. উইলিয়াম কেরি", "ঘ. রবীন্দ্রনাথ ঠাকুর"],
-                answer: "ক. ঈশ্বরচন্দ্র বিদ্যাসাগর"
+                question: "৮. বাংলাদেশের রণসংগীত সর্বপ্রথম প্রকাশিত হয়- (বেগম রোকেয়া বিশ্ববিদ্যালয়: ১৭-১৮)",
+                options: ["ক) শিখা পত্রিকায়", "খ) সমকাল পত্রিকায়", "গ) বঙ্গদর্শন পত্রিকায়", "ঘ) বেগম পত্রিকায়"],
+                answer: "ক) শিখা পত্রিকায়"
             },
             {
-                question: "৯. বাংলা সাহিত্যে কখন গদ্যের সূচনা হয়? (২৮তম বিসিএস)",
-                options: ["ক. নবম শতকে", "খ. ত্রয়োদশ শতকে", "গ. ষোড়শ শতকে", "ঘ. উনিশ শতকে"],
-                answer: "ঘ. উনিশ শতকে"
+                question: "৯. 'আমার সোনার বাংলা' কবিতাটিতে কতটি চরণ আছে? (বঙ্গবন্ধু শেখ মুজিবুর রহমান বিজ্ঞান ও প্রযুক্তি বিশ্ববিদ্যালয়: ১৩-১৪)",
+                options: ["ক) ২২টি", "খ) ২৫টি", "গ) ১৮টি", "ঘ) ২০টি"],
+                answer: "খ) ২৫টি"
             },
             {
-                question: "১০. ফোর্ট উইলিয়াম কলেজে বাংলা বিভাগ খোলা হয়- (২৬তম বিসিএস)",
-                options: ["ক. ১৮০০ সালে", "খ. ১৮০১ সালে", "গ. ১৮০২ সালে", "ঘ. ১৮০৪ সালে"],
-                answer: "খ. ১৮০১ সালে"
-            },
-            {
-                question: "১১. ইয়ং বেঙ্গল কি? (২৮তম বিসিএস)",
-                options: ["ক. বাংলাভাষা শিক্ষার্থী ইংরেজ", "খ. ইংরেজি ভাবধারাপুষ্ট বাঙালি যুবক", "গ. একটি সাহিত্যিক গোষ্ঠীর নাম", "ঘ. একটি সাময়িক পত্রের নাম"],
-                answer: "খ. ইংরেজি ভাবধারাপুষ্ট বাঙালি যুবক"
-            },
-            {
-                question: "১২. 'বত্রিশ সিংহাসন' কার রচনা? (২৬তম বিসিএস)",
-                options: ["ক. মৃত্যুঞ্জয় বিদ্যালঙ্কার", "খ. রামরাম বসু", "গ. বিদ্যাসাগর", "ঘ. রাজীব লোচন মুখোপাধ্যায়"],
-                answer: "ক. মৃত্যুঞ্জয় বিদ্যালঙ্কার"
-            },
-            {
-                question: "১৩. ঢাকার 'মুসলিম সাহিত্য সমাজ' এর প্রতিষ্ঠা কোন খ্রিষ্টাব্দে? [২৪তম বিসিএস (বাতিল)]",
-                options: ["ক. ১৯২৬", "খ. ১৯১১", "গ. ১৮৬৪", "ঘ. ১৯০৫"],
-                answer: "ক. ১৯২৬"
-            },
-            {
-                question: "১৪. 'ঢাকা মুসলিম সাহিত্য সমাজ' এর প্রধান লেখক ছিলেন- (১৫তম বিসিএস)",
-                options: ["ক. কাজী আবদুল ওদুদ, আবুল হুসেন প্রমুখ", "খ. মোহাম্মদ বরকত উল্লাহ, আবুল কালাম শামসুদ্দীন প্রমুখ", "গ. মোহাম্মদ আকরাম খাঁ, মুহম্মদ শহীদুল্লাহ প্রমুখ", "ঘ. কাজী ইমদাদুল হক, মোহাম্মদ ওয়াজেদ আলী প্রমুখ"],
-                answer: "ক. কাজী আবদুল ওদুদ, আবুল হুসেন প্রমুখ"
-            },
-            {
-                question: "১৫. বাংলা গদ্য সাহিত্যের বিকাশে কোন প্রতিষ্ঠানটির বিশেষ অবদান রয়েছে- (বাংলাদেশ, কম্পট্রোলার এন্ড অডিটর জেনারেল, পরিসংখ্যান কর্মকর্তা ২০১৭/২০২২)",
-                options: ["ক. মুহসীন কলেজ", "খ. ফোর্ট উইলিয়াম কলেজ", "গ. শ্রীরামপুর কলেজ", "ঘ. সংস্কৃত কলেজ"],
-                answer: "খ. ফোর্ট উইলিয়াম কলেজ"
-            },
-            {
-                question: "১৬. 'বাংলা একাডেমি' মূল ভবনের নাম কি ছিল? (কন্ট্রোলার জেনারেল ডিফেন্স ফাইন্যান্স, পদ: জুনিয়র অডিটর - ২০২২)",
-                options: ["ক. বর্ধমান হাউজ", "খ. বাংলা ভবন", "গ. আহসান মঞ্জিল", "ঘ. চামেলি হাউজ"],
-                answer: "ক. বর্ধমান হাউজ"
-            },
-            {
-                question: "১৭. বাংলা একাডেমি রবীন্দ্র পুরষ্কার প্রবর্তন করে (পরিসংখ্যান ডাটা এন্ট্রি/কন্ট্রোল অপারেটরা ২০২০)",
-                options: ["ক. ২০১০ সালে", "খ. ১৯৬০ সালে", "গ. ১৯৭১ সালে", "ঘ. ২০১৫ সালে"],
-                answer: "ক.২০১০ সালে"
-            },
-            {
-                question: "১৮. কলকাতায় ফোর্ট উইলিয়াম কলেজে বাংলা বিভাগ খোলা হয় কোন সালে? (পিএসসি'র প্রশাসনিক কর্মকর্তা: ২০১৯)",
-                options: ["ক. ১৮০১ খ্রি.", "খ. ১৮০২ খ্রি.", "গ. ১৮০৫ খ্রি.", "ঘ. ১৮১৫ খ্রি."],
-                answer: "ক. ১৮০১ খ্রি."
-            },
-            {
-                question: "১৯. 'ফোর্ট উইলিয়াম কলেজ' কত সালে প্রতিষ্ঠিত হয়? (সিনিয়র স্টাফ নার্স ২০১৮)",
-                options: ["ক. ১৭৯৯ সালে", "খ. ১৮০০ সালে", "গ. ১৮৮১ সালে", "ঘ. ১৮০২ সালে"],
-                answer: "খ. ১৮০০ সালে"
-            },
-            {
-                question: "২০. বাংলা একাডেমি প্রতিষ্ঠিত হয় কত সালে? (বিভিন্ন মন্ত্রণালয়ের সহকারী প্রোজায়ান ২০১৭)",
-                options: ["ক. ১৯৬৫", "খ. ১৯৫৫", "গ. ১৯৪৫", "ঘ. ১৯৭৫"],
-                answer: "খ. ১৯৫৫"
-            },
-            {
-                question: "২১. বাংলাপিডিয়া প্রকাশের উদ্যোক্তা- (বাংলাদেশ পল্লী বিদ্যুতায়ন বোর্ডের সহকারী এনফোর্সমেন্ট কো-অর্ডিনেটর ২০১৭)",
-                options: ["ক. বাংলা একাডেমি", "খ. বাংলাদেশ এশিয়াটিক সোসাইটি", "গ. মুক্তিযুদ্ধ যাদুঘর", "ঘ. দি ইউনিভার্সিটি প্রেস লি:"],
-                answer: "খ. বাংলাদেশ এশিয়াটিক সোসাইটি"
-            },
-            {
-                question: "২২. মধ্যযুগ-আধুনিক যুগের সন্ধিক্ষণের কবি কাকে বলা হয়? (স্থানীয় সরকার, পল্লী উন্নয়ন ও সমবায় মন্ত্রণালয়ের সহকারী প্রকৌশলী (সিভিল) ২০১৭)",
-                options: ["ক. ভারত চন্দ্র রায়কে", "খ. বিহারীলাল চক্রবর্তীকে", "গ. ঈশ্বর চন্দ্র গুপ্তকে", "ঘ. মধুসূদন দত্তকে"],
-                answer: "গ. ঈশ্বর চন্দ্র গুপ্তকে"
-            },
-            {
-                question: "২৩. বাংলা সাহিত্যে চলিত ভাষায় রচিত প্রথম গ্রন্থ (পররাষ্ট্র মন্ত্রণালয়ের সহকারী সাইফার কর্মকর্তা ২০১৭)",
-                options: ["ক. নারীর মূল্য", "খ. রায়তের কথা", "গ. তেল নুন লাকড়ী", "ঘ. বীরবলের হালখাতা"],
-                answer: "ঘ. বীরবলের হালখাতা"
-            },
-            {
-                question: "২৪. কোন জন চট্টগ্রাম বিশ্ববিদ্যালয়ে শিক্ষকতা করেন? (পোস্ট জেনারেল (পূর্বাঞ্চল, চট্টগ্রাম) -এর কার্যালয়ের পোস্টাল অপার্টের ২০১৬)",
-                options: ["ক. আবদুল হাকিম", "খ. আনিসুজ্জামান", "গ. হুমায়ুন আজাদ", "ঘ. সানজীদা খাতুন"],
-                answer: "খ. আনিসুজ্জামান"
-            },
-            {
-                question: "২৫. ফোর্ট উইলিয়াম কলেজের বাংলা বিভাগের প্রথম প্রধান ছিলেন [বাংলাদেশ পল্লী বিদ্যুতায়ন বোর্ডের সহকারী সচিব/সহকারী পরিচালক (প্রশাসন) ২০১৬]",
-                options: ["ক. মি. উইলিয়াম", "খ. উইলিয়াম কেরি", "গ. রামরাম বসু", "ঘ. জেসি মার্শম্যান"],
-                answer: "খ. উইলিয়াম কেরি"
-            },
-            {
-                question: "২৬. বাংলা গদ্য কোন যুগের ভাষার নিদর্শন? (বিভিন্ন মন্ত্রণালয়ের সহকারী প্রোগ্রামার, উপসহকারী প্রকৌশলী, প্রশাসনিক কর্মকর্তা ও ব্যক্তিগত কর্মকর্তা ২০১৬)",
-                options: ["ক. আধুনিক যুগ", "খ. মধ্যযুগ", "গ. মধ্য বর্তমান যুগ", "ঘ. প্রাচীন যুগ"],
-                answer: "ক. আধুনিক যুগ"
-            },
-            {
-                question: "২৭. 'ইতিহাসমালা'-র লেখক কে? (সহকারী পরিবার পরিকল্পনা কর্মকর্তা ২০১৬)",
-                options: ["ক. উইলিয়াম কেরি", "খ. বিদ্যাসাগর", "গ. মৃত্যুঞ্জয় বিদ্যালঙ্কার", "ঘ. রাম রাম বসু"],
-                answer: "ক. উইলিয়াম কেরি"
-            },
-            {
-                question: "২৮. একুশে গ্রন্থমেলার আয়োজক সংস্থার নাম কী? (সহকারী পরিবার পরিকল্পনা কর্মকর্তা ২০১৬)",
-                options: ["ক. শিল্পকলা একাডেমি", "খ. গ্রন্থাগার অধিদপ্তর", "গ. শিক্ষা অধিদপ্তর", "ঘ. বাংলা একাডেমি"],
-                answer: "ঘ. বাংলা একাডেমি"
-            },
-            {
-                question: "২৯. কে বহু ভাষাবিদ পণ্ডিত ও গবেষক ছিলেন? (সেবা পরিদপ্তরের সিনিয়র স্টাফ নার্স ২০১৬)",
-                options: ["ক. পাণিনি", "খ. সুনীতিকুমার চট্টোপাধ্যায়", "গ. ড. মুহম্মদ শহীদুল্লাহ", "ঘ. সুকুমার সেন"],
-                answer: "গ. ড. মুহম্মদ শহীদুল্লাহ"
-            },
-            {
-                question: "৩০. 'সবার উপরে মানুষ সত্য, তাহার উপরে নাই' কে বলেছেন? (২১তম বিসিএস, প্রাথমিক বিদ্যালয়ের শিক্ষক নিয়োগ পরীক্ষা ২০২২)",
-                options: ["ক. চণ্ডীদাস", "খ. বিদ্যাপতি", "গ. রামকৃষ্ণ পরমহংস", "ঘ. বিবেকানন্দ"],
-                answer: "ক. চণ্ডীদাস"
+                question: "১০. বাংলাদেশের রণসংগীতের রচয়িতা কে? (নির্বাচন কমিশন সচিবালয়ের স্টোর কিপার: ১৯/চট্টগ্রাম বিশ্ববিদ্যালয়: ১৮-১৯)",
+                options: ["ক) রবীন্দ্রনাথ ঠাকুর", "খ) কাজী নজরুল ইসলাম", "গ) জসীমউদ্দীন", "ঘ) শামসুর রাহমান"],
+                answer: "খ) কাজী নজরুল ইসলাম"
             }
         ];
         
@@ -361,16 +324,11 @@
         auth.signInAnonymously().then((userCredential) => {
             userId = userCredential.user.uid;
             isAuthReady = true;
-            // Auth সফল হলেই Merit List Listener সেট করা হবে (Workaround for Permission Error)
             setupMeritListListener(); 
         }).catch((error) => {
             console.error("Firebase Auth Error:", error);
             showModal("অথেন্টিকেশনে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
         });
-
-        // --- Timer Functions (All removed) ---
-        // Removed: const startTimer = () => { ... }
-        // Removed: const clearTimer = () => { ... }
 
         // --- Merit List ---
         const setupMeritListListener = () => {
@@ -381,7 +339,6 @@
             meritListRef.orderBy('score', 'desc').onSnapshot(snapshot => {
                 const results = [];
                 snapshot.forEach(doc => {
-                    // Store the document ID with data for later deletion/update
                     const data = doc.data();
                     data.docId = doc.id; 
                     results.push(data);
@@ -391,7 +348,6 @@
                     if (b.score !== a.score) {
                         return b.score - a.score;
                     }
-                    // Handle timestamp tie-breaker (earlier submission wins)
                     if (a.timestamp && b.timestamp) {
                         return a.timestamp.toDate() - b.timestamp.toDate();
                     }
@@ -402,16 +358,17 @@
                 renderMeritList();
             }, error => {
                 console.error("Merit list fetch error:", error);
-                // Security Rule-এর সমস্যার কারণে এই ত্রুটিটি আসতে পারে
                 showModal("মেধা তালিকা লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে নিশ্চিত করুন যে Firebase Security Rules সঠিকভাবে সেট করা আছে।");
             });
         };
 
         const getRankDesign = (index) => {
-            if (index === 0) return 'bg-yellow-400 text-yellow-900 border-yellow-500 font-extrabold shadow-lg';
-            if (index === 1) return 'bg-gray-400 text-gray-900 border-gray-500 font-bold shadow-md';
-            if (index === 2) return 'bg-orange-300 text-orange-900 border-orange-400 font-semibold shadow';
-            return 'bg-gray-100 text-gray-700 border-gray-300';
+            // Rank 1, 2, 3 designs are kept for visual distinction
+            if (index === 0) return 'bg-yellow-400 text-yellow-900 font-extrabold shadow-lg';
+            if (index === 1) return 'bg-gray-400 text-gray-900 font-bold shadow-md';
+            if (index === 2) return 'bg-orange-300 text-orange-900 font-semibold shadow';
+            // All other backgrounds are explicitly transparent (no color) to match the main canvas
+            return 'text-gray-700'; 
         };
 
         const renderMeritList = () => {
@@ -423,25 +380,21 @@
             
             // --- Implement Rank Sharing Logic ---
             let currentRank = 1;
-            let currentScore = -1;
             
             meritListData.forEach((result, index) => {
-                // Determine rank based on previous score
-                if (result.score < currentScore) {
-                    currentRank = index + 1; // Increment rank if score is lower than previous
+                if (index > 0 && result.score < meritListData[index - 1].score) {
+                    currentRank = index + 1;
                 }
-                currentScore = result.score; // Update current score
-
+                
                 const rankText = currentRank === 1 ? '১ম' : 
                                  currentRank === 2 ? '২য়' : 
                                  currentRank === 3 ? '৩য়' : 
-                                 currentRank + '.'; // Using period for other ranks
+                                 currentRank + '.';
                                  
-                // Note: Rank class uses (currentRank - 1) to map 1st, 2nd, 3rd to indices 0, 1, 2
                 const rankClass = getRankDesign(currentRank - 1); 
 
                 const li = document.createElement('li');
-                li.className = `merit-list-item p-4 text-lg border-b ${rankClass} transition duration-150`;
+                li.className = `merit-list-item p-4 text-lg transition duration-150 ${rankClass}`;
                 
                 li.innerHTML = `
                     <span class="text-center font-extrabold">${rankText}</span>
@@ -460,76 +413,100 @@
                 return;
             }
             showScreen('quiz');
-            currentQuestionIndex = 0;
             score = 0;
-            userAnswers = []; // Reset user answers
-            renderQuestion();
+            userAnswers = []; 
+            renderAllQuestions();
         };
 
-        const renderQuestion = () => {
-            // clearTimer() removed
-            if (currentQuestionIndex >= questions.length) {
-                showResults();
-                return;
-            }
+        const renderAllQuestions = () => {
+            quizForm.innerHTML = '';
+            questionCounter.textContent = `মোট প্রশ্ন: ${questions.length}টি`;
+            scoreDisplay.textContent = `স্কোর: ০০`;
 
-            const currentQuestion = questions[currentQuestionIndex];
-            questionText.textContent = currentQuestion.question;
-            questionCounter.textContent = `প্রশ্ন ${currentQuestionIndex + 1}/${questions.length}`;
-            scoreDisplay.textContent = `স্কোর: ${score}`;
-            optionsContainer.innerHTML = '';
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                // Alada background o shadow remove kora holo.
+                questionDiv.className = 'p-5'; 
+                questionDiv.innerHTML = `<h3 class="text-xl font-bold text-gray-800 mb-4">${q.question}</h3>`;
 
-            currentQuestion.options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option;
-                // Updated Smart Button Design
-                button.className = "w-full p-5 rounded-xl text-left text-lg font-medium text-white bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 transform transition duration-200 hover:scale-[1.03] focus:outline-none shadow-lg hover:shadow-xl active:scale-[1.01]";
-                button.addEventListener('click', () => handleAnswer(option));
-                optionsContainer.appendChild(button);
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'space-y-3';
+                
+                q.options.forEach((option, optionIndex) => {
+                    const optionId = `q${index}-opt${optionIndex}`;
+                    const radioInput = `<input type="radio" id="${optionId}" name="q${index}" value="${option}" class="custom-radio">`;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = optionId;
+                    label.className = 'option-label';
+                    label.innerHTML = `${radioInput} <span>${option}</span>`;
+                    
+                    optionsDiv.appendChild(label);
+                });
+                
+                questionDiv.appendChild(optionsDiv);
+                quizForm.appendChild(questionDiv);
             });
-
-            // startTimer() removed
         };
 
-        const handleAnswer = (selectedOption) => {
-            // clearTimer() removed
-            const currentQuestion = questions[currentQuestionIndex];
-            const optionButtons = optionsContainer.querySelectorAll('button');
-            const isCorrect = selectedOption === currentQuestion.answer;
+        const handleSubmit = () => {
+            score = 0;
+            userAnswers = [];
+            let unansweredCount = 0;
+            
+            questions.forEach((question, index) => {
+                const radioName = `q${index}`;
+                const selectedInput = document.querySelector(`input[name="${radioName}"]:checked`);
+                const selectedOption = selectedInput ? selectedInput.value : null;
 
-            // Store the result for review
-            userAnswers.push({
-                question: currentQuestion.question,
-                correctAnswer: currentQuestion.answer,
-                userSelected: selectedOption, // Selected option is always an answer string now
-                isCorrect: isCorrect
-            });
+                if (!selectedOption) {
+                    unansweredCount++;
+                }
 
-            optionButtons.forEach(btn => {
-                btn.disabled = true;
-                if (btn.textContent === currentQuestion.answer) {
-                    // Correct answer (Green)
-                    btn.classList.remove('bg-gradient-to-r', 'from-blue-700', 'to-indigo-700', 'hover:from-blue-600', 'hover:to-indigo-600', 'hover:scale-[1.03]');
-                    btn.classList.add('bg-green-600', 'shadow-lg');
-                } else if (btn.textContent === selectedOption) {
-                    // Wrong answer selected (Red)
-                    btn.classList.remove('bg-gradient-to-r', 'from-blue-700', 'to-indigo-700', 'hover:from-blue-600', 'hover:to-indigo-600', 'hover:scale-[1.03]');
-                    btn.classList.add('bg-red-600', 'shadow-lg');
-                } else {
-                     // Dim unselected wrong options
-                     btn.classList.add('opacity-50');
+                const isCorrect = selectedOption === question.answer;
+
+                userAnswers.push({
+                    question: question.question,
+                    correctAnswer: question.answer,
+                    userSelected: selectedOption || 'উত্তর দেওয়া হয়নি',
+                    isCorrect: isCorrect
+                });
+
+                if (isCorrect) {
+                    score++;
                 }
             });
-            
-            // Only count score if an option was selected and it was correct
-            if (isCorrect) {
-                score++;
+
+            if (unansweredCount > 0) {
+                // Modified to show a clear modal and prevent submission
+                showModal(`আপনি ${unansweredCount}টি প্রশ্নের উত্তর দেননি। উত্তর না দিয়ে কুইজ জমা দেওয়া সম্ভব নয়।`);
+                return; // Prevent submission
             }
 
+            // Disable all radio buttons after submission
+            const allRadios = quizForm.querySelectorAll('input[type="radio"]');
+            allRadios.forEach(radio => radio.disabled = true);
+            
+            // Mark correct/incorrect answers visually
+            questions.forEach((question, index) => {
+                const questionDiv = quizForm.children[index];
+                question.options.forEach((option, optionIndex) => {
+                    const optionId = `q${index}-opt${optionIndex}`;
+                    const label = questionDiv.querySelector(`label[for="${optionId}"]`);
+                    const radio = questionDiv.querySelector(`#${optionId}`);
+
+                    if (option === question.answer) {
+                        label.classList.add('correct');
+                    } else if (radio.checked) {
+                        label.classList.add('incorrect');
+                    }
+                });
+            });
+
+            // Show results after a short delay to see the visual feedback
             setTimeout(() => {
-                currentQuestionIndex++;
-                renderQuestion();
-            }, 1500); // Wait a bit longer to see the result
+                showResults();
+            }, 1000);
         };
 
         const renderQuizReview = () => {
@@ -538,12 +515,10 @@
                 const reviewItem = document.createElement('div');
                 const isCorrect = answer.isCorrect;
                 const textColor = isCorrect ? 'text-green-700' : 'text-red-700';
-                const bgColor = isCorrect ? 'bg-green-50' : 'bg-red-50';
                 const icon = isCorrect ? '✅' : '❌';
-                // Simplified selectedText since null is no longer possible
                 const selectedText = answer.userSelected; 
 
-                reviewItem.className = `p-4 rounded-lg border ${bgColor}`;
+                reviewItem.className = `p-2 rounded-lg border-b border-gray-200`; 
                 reviewItem.innerHTML = `
                     <p class="font-bold text-lg mb-2 ${textColor}">${index + 1}. ${answer.question} <span class="float-right">${icon}</span></p>
                     <p class="text-sm">আপনার উত্তর: <span class="${textColor} font-semibold">${selectedText}</span></p>
@@ -555,7 +530,6 @@
 
 
         const showResults = async () => {
-            // clearTimer() removed
             showScreen('results');
             finalScoreText.textContent = `আপনার স্কোর: ${score}/${questions.length}`;
             renderQuizReview(); // Show the review section
@@ -628,13 +602,11 @@
             const tableRows = [];
             
             let currentRank = 1;
-            let currentScore = -1;
 
             meritListData.forEach((item, index) => {
-                if (item.score < currentScore) {
+                if (index > 0 && item.score < meritListData[index - 1].score) {
                     currentRank = index + 1;
                 }
-                currentScore = item.score;
                 
                 const rankText = currentRank === 1 ? '1st' : 
                                  currentRank === 2 ? '2nd' : 
@@ -682,8 +654,7 @@
         downloadPdfBtn.addEventListener('click', downloadPDF);
         goBackBtn.addEventListener('click', () => showScreen('start'));
         modalCloseBtn.addEventListener('click', closeModal);
-
+        submitQuizBtn.addEventListener('click', handleSubmit);
     </script>
 </body>
 </html>
-
