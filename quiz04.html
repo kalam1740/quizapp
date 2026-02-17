@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Bangla Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 100vh;
+            color: #1e293b;
+            overflow-x: hidden;
+            font-size: 14px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-style {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+            transition: all 0.3s ease;
+        }
+
+        .input-style:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.1);
+        }
+
+        .option-btn {
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+            padding: 10px 14px;
+        }
+
+        .option-btn:hover {
+            background: #f1f5f9;
+            border-color: #6366f1;
+        }
+
+        .option-btn.selected {
+            background: #6366f1 !important;
+            color: white !important;
+            border-color: #4f46e5;
+        }
+
+        .option-btn.selected span {
+            color: white !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .hide { display: none !important; }
+        
+        .error-shake {
+            animation: shake 0.5s ease-in-out;
+            border-color: #ef4444 !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        .solution-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body class="py-4 px-3">
+
+    <!-- পেজ ১: লগইন স্ক্রিন -->
+    <div id="login-page" class="max-w-xs mx-auto text-center mt-12 animate-fade">
+        <div class="glass-panel p-6 shadow-lg border border-slate-200">
+            <div class="mb-5">
+                <div class="inline-block p-2.5 bg-indigo-600 rounded-xl mb-3 shadow-md">
+                    <i class="fas fa-paint-brush text-3xl text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold mb-1 tracking-tight text-slate-800">শিল্প ও সংস্কৃতি কুইজ</h1>
+                <p class="text-slate-500 text-xs font-medium">আপনার নাম লিখে শুরু করুন</p>
+            </div>
+            
+            <div class="relative mb-5">
+                <input type="text" id="user-name-input" placeholder="এখানে নাম লিখুন..." 
+                       class="input-style w-full p-2.5 rounded-lg text-center text-base">
+                <p id="name-error" class="text-red-500 text-[10px] hide font-bold mt-1">নাম লেখা আবশ্যক!</p>
+            </div>
+            
+            <button id="start-btn" onclick="goToQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg text-sm transition-all active:scale-95 shadow-md w-full">
+                শুরু করুন <i class="fas fa-play ml-1 text-[10px]"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- পেজ ২: কুইজ প্রশ্ন পেজ -->
+    <div id="quiz-page" class="max-w-xl mx-auto hide">
+        <!-- স্টিকি হেডার -->
+        <div class="glass-panel p-2.5 mb-4 sticky top-2 z-10 shadow-md border border-slate-200 flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="bg-indigo-600 p-1 rounded-md mr-2 shadow-sm">
+                    <i class="fas fa-user text-white text-[10px]"></i>
+                </div>
+                <div>
+                    <h2 id="display-user-name" class="text-xs font-bold text-indigo-600 leading-tight">User Name</h2>
+                    <span class="text-slate-400 text-[9px] uppercase font-bold">অংশগ্রহণকারী</span>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-slate-700 text-[11px]">চিত্রশিল্প ও সংস্কৃতি</p>
+                <span class="text-slate-400 text-[9px] uppercase font-bold">সেশন</span>
+            </div>
+        </div>
+
+        <div id="questions-container" class="space-y-3 mb-8"></div>
+
+        <div class="text-center pb-16">
+            <button id="submit-btn" onclick="goToResult()" disabled class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold py-3 px-10 rounded-xl text-base transition-all shadow-md">
+                ফলাফল দেখুন <i class="fas fa-check-circle ml-1"></i>
+            </button>
+            <p id="pending-msg" class="mt-2 text-slate-400 text-[10px] italic font-medium">সব উত্তর দিলে বাটনটি সক্রিয় হবে</p>
+        </div>
+    </div>
+
+    <!-- পেজ ৩: ফলাফল পেজ -->
+    <div id="result-page" class="fixed inset-0 bg-slate-50/95 backdrop-blur-md z-50 flex items-center justify-center hide p-3">
+        <div class="glass-panel max-w-xs w-full p-5 text-center animate-fade border border-slate-200 max-h-[90vh] overflow-y-auto">
+            <div id="result-icon" class="text-4xl mb-2">🏆</div>
+            <h2 class="text-lg font-bold mb-1 text-slate-800"><span id="res-name" class="text-indigo-600">User</span>, অভিনন্দন!</h2>
+            <p id="result-msg" class="text-slate-500 text-[11px] mb-3 font-medium">কুইজটি সফলভাবে শেষ করেছেন।</p>
+            
+            <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-3 mb-5">
+                <p class="text-slate-500 uppercase text-[9px] mb-0.5 font-bold">অর্জিত স্কোর</p>
+                <div class="text-3xl font-black text-indigo-600">
+                    <span id="final-score">0</span><span class="text-base text-slate-400"> / 8</span>
+                </div>
+            </div>
+
+            <div class="space-y-2.5">
+                <!-- সমাধান বাটন -->
+                <button onclick="toggleSolutions()" id="sol-toggle-btn" class="w-full bg-slate-800 hover:bg-black text-white font-bold py-2 rounded-lg transition-all text-xs flex items-center justify-center space-x-2">
+                    <i class="fas fa-eye text-[10px]"></i>
+                    <span>সঠিক সমাধান দেখুন</span>
+                </button>
+
+                <!-- সমাধান লিস্ট -->
+                <div id="solutions-list" class="hide text-left space-y-2 mt-3 animate-fade"></div>
+
+                <!-- হোয়াটসঅ্যাপ গ্রুপ লিংক -->
+                <div class="bg-slate-50 rounded-lg p-2.5 border border-slate-200">
+                    <p class="text-slate-500 text-[9px] mb-1.5 font-bold uppercase tracking-widest">পরীক্ষার গ্রুপে যোগ দিন</p>
+                    <a href="https://chat.whatsapp.com/H3AmrICM2ObKCgRw9fHGWt" target="_blank" 
+                       class="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md transition-all transform hover:scale-102 shadow-sm group">
+                        <i class="fab fa-whatsapp text-base"></i>
+                        <span class="font-bold text-xs">WhatsApp Group</span>
+                    </a>
+                </div>
+
+                <button onclick="location.reload()" class="w-full border border-slate-200 text-slate-600 font-bold py-2 rounded-lg hover:bg-slate-50 text-xs">
+                    আবার শুরু করুন <i class="fas fa-redo ml-1 text-[9px]"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { 
+                question: "স্বাধীনতার সুবর্ণজয়ন্তী লোগোর নকশা করেন কে?", 
+                options: ["রামেন্দু মজুমদার", "প্রদীপ চক্রবর্তী", "সব্যসাচী হাজরা", "কে এন বি ডব্লিউডি"], 
+                correct: 2 
+            },
+            { 
+                question: "‘ম্যাডোনা-৪৩’ চিত্রটি কার আঁকা?", 
+                options: ["জয়নুল আবেদীন", "রুদ্র মোনে", "ভিনসেন্ট ভ্যানগগ", "পাবলো পিকাসো"], 
+                correct: 0 
+            },
+            { 
+                question: "‘ম্যাডোনা-৪৩’ চিত্রকর্মটি কিসের উপর আঁকা?", 
+                options: ["নায়িকা ম্যাডোনার উপর", "চলচ্চিত্র পুরস্কারের উপর", "প্রাকৃতিক সৌন্দর্যের উপর", "দুর্ভিক্ষের উপর"], 
+                correct: 3 
+            },
+            { 
+                question: "‘বেঙ্গল ফাউন্ডেশন’ কি?", 
+                options: ["আর্ট গ্যালারি", "আবাসিক এলাকা", "চিত্রকর্ম", "চলচ্চিত্র"], 
+                correct: 0 
+            },
+            { 
+                question: "‘আদি আবাদ’ চিত্রকর্মটির শিল্পী কে?", 
+                options: ["জয়নুল আবেদীন", "শাহাবুদ্দিন আহমদ", "এস এম সুলতান", "কাইয়ুম চৌধুরী"], 
+                correct: 2 
+            },
+            { 
+                question: "মনপুরা-৭০ কি?", 
+                options: ["একটি উপন্যাসের নাম", "একটি চলচ্চিত্রের নাম", "একটি চিত্রশিল্প", "একটি উপজেলা"], 
+                correct: 2 
+            },
+            { 
+                question: "“সংগ্রাম” চিত্রকর্মের শিল্পী কে?", 
+                options: ["এসএম সুলতান", "কামরুল হাসান", "জয়নুল আবেদীন", "কাইয়ুম চৌধুরী"], 
+                correct: 2 
+            },
+            { 
+                question: "বিখ্যাত চিত্রকর্ম “তিন কন্যা” এর চিত্রকার কে?", 
+                options: ["জয়নুল আবেদীন", "কামরুল হাসান", "এস.এম. সুলতান", "রফিকুন্নবী"], 
+                correct: 1 
+            }
+        ];
+
+        let userName = "";
+        let userSelections = new Array(quizData.length).fill(null);
+
+        function goToQuiz() {
+            const input = document.getElementById('user-name-input');
+            const error = document.getElementById('name-error');
+            
+            if (input.value.trim() === "") {
+                input.classList.add('error-shake');
+                error.classList.remove('hide');
+                setTimeout(() => input.classList.remove('error-shake'), 500);
+                return;
+            }
+
+            userName = input.value.trim();
+            document.getElementById('login-page').classList.add('hide');
+            document.getElementById('quiz-page').classList.remove('hide');
+            document.getElementById('display-user-name').innerText = userName;
+            renderQuestions();
+            window.scrollTo(0, 0);
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = "";
+            
+            quizData.forEach((item, qIdx) => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel p-4 animate-fade mb-4';
+                card.style.animationDelay = `${qIdx * 0.05}s`;
+                
+                let optionsHtml = '';
+                const labels = ["ক", "খ", "গ", "ঘ"];
+                
+                item.options.forEach((opt, oIdx) => {
+                    optionsHtml += `
+                        <button onclick="handleSelect(${qIdx}, ${oIdx}, this)" 
+                                class="option-btn w-full rounded-md text-left flex items-center space-x-3 mb-2">
+                            <span class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-xs font-bold border border-slate-200 text-indigo-600 transition-colors shrink-0">
+                                ${labels[oIdx]}
+                            </span>
+                            <span class="text-[15px] font-semibold leading-tight text-slate-700">${opt}</span>
+                        </button>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <h3 class="text-[14px] font-bold mb-3 text-slate-800 leading-snug">
+                        <span class="bg-indigo-600 text-white w-5 h-5 inline-flex items-center justify-center rounded text-[10px] mr-2">${qIdx + 1}</span> 
+                        ${item.question}
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        ${optionsHtml}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function handleSelect(qIdx, oIdx, btn) {
+            const parent = btn.parentElement;
+            Array.from(parent.querySelectorAll('.option-btn')).forEach(child => {
+                child.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            userSelections[qIdx] = oIdx;
+            
+            const answeredCount = userSelections.filter(x => x !== null).length;
+            if (answeredCount === quizData.length) {
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = false;
+                document.getElementById('pending-msg').classList.add('hide');
+            }
+        }
+
+        function goToResult() {
+            let score = 0;
+            userSelections.forEach((val, idx) => {
+                if (val === quizData[idx].correct) score++;
+            });
+
+            document.getElementById('quiz-page').classList.add('hide');
+            document.getElementById('result-page').classList.remove('hide');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('res-name').innerText = userName;
+
+            const icon = document.getElementById('result-icon');
+            const msg = document.getElementById('result-msg');
+
+            if (score === quizData.length) {
+                icon.innerText = "👑";
+                msg.innerText = "অসাধারণ প্রস্তুতি!";
+            } else if (score >= 5) {
+                icon.innerText = "🌟";
+                msg.innerText = "বেশ ভালো প্রস্তুতি।";
+            } else {
+                icon.innerText = "📚";
+                msg.innerText = "আরেকটু রিভিশন প্রয়োজন।";
+            }
+
+            buildSolutions();
+        }
+
+        function buildSolutions() {
+            const solList = document.getElementById('solutions-list');
+            const labels = ["ক", "খ", "গ", "ঘ"];
+            solList.innerHTML = `<h4 class="text-indigo-600 font-bold border-b border-slate-200 pb-1.5 mb-2.5 text-[11px] flex items-center uppercase">
+                <i class="fas fa-list-check mr-1.5"></i> সমাধান গাইড:</h4>`;
+            
+            quizData.forEach((item, idx) => {
+                const isCorrect = userSelections[idx] === item.correct;
+                const solCard = document.createElement('div');
+                solCard.className = `solution-card ${isCorrect ? 'border-green-100 bg-green-50/20' : 'border-red-100 bg-red-50/20'}`;
+                
+                solCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-1">
+                        <span class="text-slate-500 text-[9px] font-bold uppercase">#${idx + 1}</span>
+                        <i class="fas ${isCorrect ? 'fa-check text-green-500' : 'fa-times text-red-500'} text-[10px]"></i>
+                    </div>
+                    <p class="text-slate-800 font-bold text-[12px] mb-2 leading-tight">${item.question}</p>
+                    <div class="space-y-1 text-[11px]">
+                        <div class="text-green-700 font-bold">সঠিক: ${labels[item.correct]}. ${item.options[item.correct]}</div>
+                        <div class="${isCorrect ? 'text-indigo-600' : 'text-red-700'}">আপনার: ${userSelections[idx] !== null ? labels[userSelections[idx]] : 'নাই'}</div>
+                    </div>
+                `;
+                solList.appendChild(solCard);
+            });
+        }
+
+        function toggleSolutions() {
+            const list = document.getElementById('solutions-list');
+            const btn = document.getElementById('sol-toggle-btn');
+            const isHidden = list.classList.contains('hide');
+            
+            if (isHidden) {
+                list.classList.remove('hide');
+                btn.innerHTML = `<i class="fas fa-eye-slash text-[10px]"></i> <span>বন্ধ করুন</span>`;
+                setTimeout(() => {
+                    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                list.classList.add('hide');
+                btn.innerHTML = `<i class="fas fa-eye text-[10px]"></i> <span>সঠিক সমাধান দেখুন</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
